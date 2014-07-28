@@ -74,7 +74,7 @@ T abs(T)(T vec) if(is_vector!T) {
     foreach(i, element; vec.vector) {
         ret.vector[i] = abs(element);
     }
-
+    
     return ret;
 }
 
@@ -266,7 +266,18 @@ unittest {
 }
 
 /// Returns min(max(x, min_val), max_val), Results are undefined if min_val > max_val.
-auto clamp(T1, T2, T3)(T1 x, T2 min_val, T3 max_val) {
+CommonType!(T1,T2,T3) clamp(T1, T2, T3)(T1 x, T2 min_val, T3 max_val)
+in
+{
+    assert(max_val >= min_val);
+}
+out(result)
+{
+    assert(result >= min_val);
+    assert(result <= max_val);
+}
+body
+{
     return min(max(x, min_val), max_val);
 }
 
@@ -286,7 +297,7 @@ float step(T1, T2)(T1 edge, T2 x) {
 /// Returns 0.0 if x <= edge0 and 1.0 if x >= edge1 and performs smooth 
 /// hermite interpolation between 0 and 1 when edge0 < x < edge1. 
 /// This is useful in cases where you would want a threshold function with a smooth transition.
-auto smoothstep(T1, T2, T3)(T1 edge0, T2 edge1, T3 x) {
+CommonType!(T1,T2,T3) smoothstep(T1, T2, T3)(T1 edge0, T2 edge1, T3 x) {
     auto t = clamp((x - edge0) / (edge1 - edge0), 0, 1);
     return t * t * (3 - 2 * t);
 }
@@ -302,6 +313,16 @@ auto uppow2(U)(U x) if(isIntegral!U && isUnsigned!U)
     static if(x.sizeof > 4) x |= x >> 32;
     ++x;
     return x;
+}
+
+bool ispow2(U)(U x) if(isIntegral!U)
+in
+{
+    assert(0 != x); //fuck off
+}
+body
+{
+    return 0 == (x & (x - 1));
 }
 
 unittest {
@@ -322,4 +343,12 @@ unittest {
     assert(uppow2(5u) == 8);
     assert(uppow2(65500u) == 65536);
     assert(uppow2(2147483000u) == 2147483648);
+
+    assert(ispow2(2));
+    assert(ispow2(4));
+    assert(ispow2(256));
+    assert(ispow2(0x10000));
+    assert(ispow2(0x100000000));
+    assert(!ispow2(5));
+    assert(!ispow2(-1));
 }

@@ -63,6 +63,18 @@ final:
 
     @property auto width()  const pure nothrow { return mWidth; }
     @property auto height() const pure nothrow { return mHeight; }
+    @property auto data()   inout pure nothrow 
+    {
+        assert(mSurface);
+        assert(isLocked);
+        return mSurface.pixels;
+    }
+    @property auto pitch() const pure nothrow
+    {
+        assert(mSurface);
+        assert(isLocked);
+        return mSurface.pitch;
+    }
 
     void lock()
     {
@@ -131,83 +143,9 @@ public:
     final auto opIndex(int y) pure nothrow
     {
         assert(isLocked);
-        assert(y >= 0 && y < height);
-        struct Line
-        {
-            debug
-            {
-                Surface surf;
-                int y;
-            }
-            int pitch;
-            ColorT* data;
-
-            auto opIndex(int x) const pure nothrow
-            {
-                assert(x >= 0);
-                debug
-                {
-                    assert(x < surf.width);
-                    assert(surf.isLocked);
-                }
-                return data[x];
-            }
-
-            auto opIndexAssign(in ColorT value, int x) pure nothrow
-            {
-                assert(x >= 0);
-                debug
-                {
-                    assert(x < surf.width);
-                    assert(surf.isLocked);
-                }
-                return data[x] = value;
-            }
-
-            auto opSlice(int x1, int x2) inout pure nothrow
-            {
-                assert(x1 >= 0);
-                assert(x2 >= x1);
-                debug
-                {
-                    assert(x2 <= surf.width);
-                    assert(surf.isLocked);
-                }
-                return data[x1..x2];
-            }
-
-            auto opSliceAssign(T)(in T val, int x1, int x2) pure nothrow
-            {
-                assert(x1 >= 0);
-                assert(x2 >= x1);
-                debug
-                {
-                    assert(x2 <= surf.width);
-                    assert(surf.isLocked);
-                }
-                return data[x1..x2] = val;
-            }
-
-            ref auto opUnary(string op)() pure nothrow if(op == "++" || op == "--")
-            {
-                mixin("data = cast(ColorT*)(cast(byte*)data"~op[0]~" pitch);");
-                debug
-                {
-                    mixin("y"~op~";");
-                    assert(y >= 0 && y < surf.height);
-                }
-                return this;
-            }
-        }
-
-        Line ret = {pitch: mSurface.pitch, data: cast(ColorT*)(mSurface.pixels + mSurface.pitch * y) };
-        assert(mSurface.pixels);
-        debug
-        {
-            ret.surf = this;
-            ret.y = y;
-        }
-        return ret;
+        import gamelib.graphics.surfaceview;
+        SurfaceView!ColorT view = this;
+        return view[y];
     }
 
     void fill(in ColorT col)
