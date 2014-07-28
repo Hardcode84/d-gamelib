@@ -8,6 +8,7 @@ class Surface
 {
 package:
     SDL_Surface* mSurface = null;
+    bool mOwned = true;
     int mLockCount = 0;
     immutable int mWidth;
     immutable int mHeight;
@@ -17,6 +18,7 @@ package:
         mWidth   = surf.w;
         mHeight  = surf.h;
         mSurface = surf;
+        mOwned = false;
     }
 public:
 final:
@@ -41,7 +43,7 @@ final:
         mWidth = width;
         mHeight = height;
     }
-    ~this()
+    ~this() const pure nothrow
     {
         assert(!mSurface);
     }
@@ -51,7 +53,10 @@ final:
         if(mSurface)
         {
             assert(0 == mLockCount);
-            SDL_FreeSurface(mSurface);
+            if(mOwned)
+            {
+                SDL_FreeSurface(mSurface);
+            }
             mSurface = null;
         }
     }

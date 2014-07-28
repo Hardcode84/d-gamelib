@@ -56,7 +56,11 @@ public:
         {
             SDL_DestroyWindow(mWindow);
             mWindow = null;
-            mCachedSurf = null;
+            if(mCachedSurf)
+            {
+                mCachedSurf.dispose();
+                mCachedSurf = null;
+            }
         }
     }
 
@@ -110,7 +114,7 @@ public:
 
     @property auto surface(T)()
     {
-        return enforce(cast(surfaceFF!T)surface(), new ColorFormatException("Invalid pixel format: "~T.stringog));
+        return enforce(cast(FFSurface!T)surface(), new ColorFormatException("Invalid pixel format: "~T.stringof));
     }
 
     void updateSurface(Surface surf = null)
