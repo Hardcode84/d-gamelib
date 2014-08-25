@@ -189,12 +189,17 @@ struct Vector(type, int dimension_) {
           
     /// Returns true if all values are not nan and finite, otherwise false.
     @property bool isFinite() const {
-        foreach(v; vector) {
-            if(isNaN(v) || isInfinity(v)) {
-                return false;
-            }
+        static if(isIntegral!type) {
+            return true;
         }
-        return true;
+        else {
+            foreach(v; vector) {
+                if(isNaN(v) || isInfinity(v)) {
+                    return false;
+                }
+            }
+            return true;
+        }
     }
     deprecated("Use isFinite instead of ok") alias ok = isFinite;
     
