@@ -9,6 +9,33 @@ public import derelict.sdl2.image;
 alias SDL_Point Point;
 alias SDL_Rect Rect;
 
+void debugOut(T)(auto ref T val) pure nothrow @trusted
+{
+    debug
+    {
+        import std.stdio;
+        try
+        {
+            writeln(val);
+        }
+        catch(Exception e) {}
+    }
+}
+
+auto debugConv(T)(auto ref T val) pure nothrow @trusted
+{
+    debug
+    {
+        import std.conv;
+        try
+        {
+            return text(val);
+        }
+        catch(Exception e) {}
+    }
+    return "";
+}
+
 struct Size
 {
     int w, h;
@@ -25,6 +52,48 @@ struct Color
     enum Uint32 gmask = 0x0000ff00;
     enum Uint32 bmask = 0x00ff0000;
     enum Uint32 amask = 0xff000000;
+    static Color lerp(T)(in Color col1, in Color col2, in T coeff) pure nothrow
+    {
+        //assert(coeff >= (0), debugConv(coeff));
+        //assert(coeff <= (1), debugConv(coeff));
+        Color ret;
+        import std.typetuple, std.string;
+        foreach(c;TypeTuple!('r','g','b'))
+        {
+            enum str = format("ret.%1$s = cast(ubyte)(col2.%1$s*(cast(T)1 - coeff) + col1.%1$s*coeff);",c);
+            mixin(str);
+        }
+        return ret;
+    }
+
+    auto toRaw() const pure nothrow
+    {
+        static assert(this.sizeof == uint.sizeof);
+        union U
+        {
+            Color c;
+            uint i;
+        }
+        U u = void;
+        u.c = this;
+        return u.i;
+    }
+    static auto fromRaw(in uint i) pure nothrow
+    {
+        union U
+        {
+            Color c;
+            uint i;
+        }
+        U u = void;
+        u.i = i;
+        return u.c;
+    }
+    static Color average(in Color col1,in Color col2) pure nothrow
+    {
+        return Color.fromRaw(((col1.toRaw() & 0xfefefefe) >> 1) +
+                             ((col2.toRaw() & 0xfefefefe) >> 1));
+    }
 }
 
 enum Color ColorWhite = {r:255,g:255,b:255};
