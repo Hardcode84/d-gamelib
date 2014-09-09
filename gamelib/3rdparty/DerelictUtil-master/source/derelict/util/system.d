@@ -39,6 +39,13 @@ else enum Derelict_OS_Linux = false;
 version( Posix ) enum Derelict_OS_Posix = true;
 else enum Derelict_OS_Posix = false;
 
+version( Android ) enum Derelict_OS_Android = true;
+else enum Derelict_OS_Android = false;
+
+// TODO
+enum Derelict_OS_iOS = false;
+enum Derelict_OS_WinRT = false;
+
 version( FreeBSD ) {
 	enum Derelict_OS_AnyBSD = true;
 	enum Derelict_OS_FreeBSD = true;
@@ -60,3 +67,5 @@ version( FreeBSD ) {
 	enum Derelict_OS_OpenBSD = false;
 	enum Derelict_OS_OtherBSD = false;
 }
+
+static if( __VERSION__ < 2066 ) enum nogc = 1;

@@ -40,7 +40,7 @@ private {
     else static if( Derelict_OS_Mac )
         enum libNames = "../Frameworks/SDL2_ttf.framework/SDL2_ttf, /Library/Frameworks/SDL2_ttf.framework/SDL2_ttf, /System/Library/Frameworks/SDL2_ttf.framework/SDL2_ttf";
     else static if( Derelict_OS_Posix )
-        enum libNames = "libSDL2_ttf.so, libSDL2_ttf-2.0.so, libSDL2_ttf-2.0.so.0, /usr/local/lib/libSDL2.so, /usr/local/lib/libSDL2_ttf-2.0.so, /usr/local/lib/libSDL2_ttf-2.0.so.0";
+        enum libNames = "libSDL2_ttf.so, libSDL2_ttf-2.0.so, libSDL2_ttf-2.0.so.0, /usr/local/lib/libSDL2_ttf-2.0.so, /usr/local/lib/libSDL2_ttf-2.0.so.0";
     else
         static assert( 0, "Need to implement SDL2_ttf libNames for this operating system." );
 }
@@ -124,6 +124,9 @@ extern ( C ) nothrow {
     alias da_TTF_RenderText_Blended = SDL_Surface* function ( TTF_Font*, const( char )*, SDL_Color );
     alias da_TTF_RenderUTF8_Blended = SDL_Surface* function ( TTF_Font*, const( char )*, SDL_Color );
     alias da_TTF_RenderUNICODE_Blended = SDL_Surface* function ( TTF_Font*, const( Uint16 )*, SDL_Color );
+    alias da_TTF_RenderText_Blended_Wrapped = SDL_Surface* function( TTF_Font*, const( char )*, SDL_Color, Uint32 );
+    alias da_TTF_RenderUTF8_Blended_Wrapped = SDL_Surface* function( TTF_Font*, const( char )*, SDL_Color, Uint32 );
+    alias da_TTF_RenderUNICODE_Blended_Wrapped = SDL_Surface* function( TTF_Font*, const( Uint16 )*, SDL_Color, Uint32 );
     alias da_TTF_RenderGlyph_Blended = SDL_Surface* function ( TTF_Font*, Uint16, SDL_Color );
     alias da_TTF_CloseFont = void function ( TTF_Font* );
     alias da_TTF_Quit = void function ();
@@ -171,6 +174,9 @@ __gshared {
     da_TTF_RenderText_Blended TTF_RenderText_Blended;
     da_TTF_RenderUTF8_Blended TTF_RenderUTF8_Blended;
     da_TTF_RenderUNICODE_Blended TTF_RenderUNICODE_Blended;
+    da_TTF_RenderText_Blended_Wrapped TTF_RenderText_Blended_Wrapped;
+    da_TTF_RenderUTF8_Blended_Wrapped TTF_RenderUTF8_Blended_Wrapped;
+    da_TTF_RenderUNICODE_Blended_Wrapped TTF_RenderUNICODE_Blended_Wrapped;
     da_TTF_RenderGlyph_Blended TTF_RenderGlyph_Blended;
     da_TTF_CloseFont TTF_CloseFont;
     da_TTF_Quit TTF_Quit;
@@ -227,6 +233,9 @@ class DerelictSDL2ttfLoader : SharedLibLoader {
         bindFunc( cast( void** )&TTF_RenderText_Blended, "TTF_RenderText_Blended" );
         bindFunc( cast( void** )&TTF_RenderUTF8_Blended, "TTF_RenderUTF8_Blended" );
         bindFunc( cast( void** )&TTF_RenderUNICODE_Blended, "TTF_RenderUNICODE_Blended" );
+        bindFunc( cast( void** )&TTF_RenderText_Blended_Wrapped, "TTF_RenderText_Blended_Wrapped" );
+        bindFunc( cast( void** )&TTF_RenderUTF8_Blended_Wrapped, "TTF_RenderUTF8_Blended_Wrapped" );
+        bindFunc( cast( void** )&TTF_RenderUNICODE_Blended_Wrapped, "TTF_RenderUNICODE_Blended_Wrapped" );
         bindFunc( cast( void** )&TTF_RenderGlyph_Blended, "TTF_RenderGlyph_Blended" );
         bindFunc( cast( void** )&TTF_CloseFont, "TTF_CloseFont" );
         bindFunc( cast( void** )&TTF_Quit, "TTF_Quit" );

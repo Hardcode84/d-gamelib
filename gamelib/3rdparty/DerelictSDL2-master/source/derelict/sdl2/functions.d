@@ -30,10 +30,11 @@ module derelict.sdl2.functions;
 private {
     import core.stdc.stdio;
     import core.stdc.stdarg;
+    import derelict.util.system;
     import derelict.sdl2.types;
 }
 
-extern( C ) nothrow {
+extern( C ) @nogc nothrow {
     // SDL.h
     alias da_SDL_Init = int function( Uint32 );
     alias da_SDL_InitSubSystem = int function( Uint32 );
@@ -92,6 +93,7 @@ extern( C ) nothrow {
     alias da_SDL_HasSSE3 = SDL_bool function();
     alias da_SDL_HasSSE41 = SDL_bool function();
     alias da_SDL_HasSSE42 = SDL_bool function();
+    alias da_SDL_HasAVX = SDL_bool function();
     alias da_SDL_GetSystemRAM = int function();
 
     // SDL_error.h
@@ -119,6 +121,7 @@ extern( C ) nothrow {
     alias da_SDL_RegisterEvents = Uint32 function( int );
 
     // SDL_gamecontroller.h
+    alias da_SDL_GameControllerAddMappingsFromRW = int function( SDL_RWops*, int );
     alias da_SDL_GameControllerAddMapping = int function( const( char )* );
     alias da_SDL_GameControllerMappingForGUID = char* function( SDL_JoystickGUID );
     alias da_SDL_GameControllerMapping = char* function( SDL_GameController* );
@@ -139,7 +142,6 @@ extern( C ) nothrow {
     alias da_SDL_GameControllerGetBindForButton = SDL_GameControllerButtonBind function( SDL_GameController*, SDL_GameControllerButton );
     alias da_SDL_GameControllerGetButton = Uint8 function( SDL_GameController*, SDL_GameControllerButton );
     alias da_SDL_GameControllerClose = void function( SDL_GameController* );
-
 
     // SDL_gesture.h
     alias da_SDL_RecordGesture = int function( SDL_TouchID );
@@ -420,6 +422,32 @@ extern( C ) nothrow {
     alias SDL_BlitSurface = SDL_UpperBlit;
     alias SDL_BlitScaled = SDL_UpperBlitScaled;
 
+    // SDL_system.h
+    static if( Derelict_OS_Windows ) {
+        alias da_SDL_Direct3D9GetAdapterIndex = int function( int );
+        alias da_SDL_RenderGetD3D9Device = IDirect3DDevice9* function( SDL_Renderer* );
+        alias da_SDL_DXGIGetOutputInfo = void function ( int, int*, int* );
+    }
+    static if( Derelict_OS_iOS ) {
+        alias da_SDL_iPhoneSetAnimationCallback = int function( SDL_Window*, int, SDL_iPhoneAnimationCallback, void* );
+        alias da_SDL_iPhoneSetEventPump = void function( SDL_bool );
+    }
+    static if( Derelict_OS_Android ) {
+        alias da_SDL_AndroidGetJNIEnv = void* function();
+        alias da_SDL_AndroidGetActivity = void* function();
+
+        alias da_SDL_AndroidGetInternalStoragePath = const( char )* function();
+        alias da_SDL_AndroidGetInternalStorageState = int function();
+        alias da_SDL_AndroidGetExternalStoragePath = const( char )* function();
+    }
+    static if( Derelict_OS_WinRT ) {
+        alias da_SDL_WinRTGetFSPathUNICODE = const( wchar_t )* function( SDL_WinRT_Path );
+        alias da_SDL_WinRTGetFSPathUTF8 = const( char )* function( SDL_WinRT_Path );
+    }
+
+    // SDL_syswm.h
+    alias da_SDL_GetWindowWMInfo = SDL_bool function(SDL_Window* window, SDL_SysWMinfo * info);
+
     // SDL_timer.h
     alias da_SDL_GetTicks = Uint32 function();
     alias da_SDL_GetPerformanceCounter = Uint64 function();
@@ -500,6 +528,7 @@ extern( C ) nothrow {
     alias da_SDL_GL_GetProcAddress = void* function( const( char )* );
     alias da_SDL_GL_UnloadLibrary = void function();
     alias da_SDL_GL_ExtensionSupported = SDL_bool function( const( char )* );
+    alias da_SDL_GL_ResetAttributes = void function();
     alias da_SDL_GL_SetAttribute = int function( SDL_GLattr, int );
     alias da_SDL_GL_GetAttribute = int function( SDL_GLattr, int* );
     alias da_SDL_GL_CreateContext = SDL_GLContext function( SDL_Window* );
@@ -525,6 +554,11 @@ nothrow SDL_AudioSpec* SDL_LoadWAV( const( char )* file, SDL_AudioSpec* spec, Ui
 // SDL_events.h
 nothrow Uint8 SDL_GetEventState( Uint32 type ) {
     return SDL_EventState( type, SDL_QUERY );
+}
+
+// SDL_GameController.h
+nothrow int SDL_GameControllerAddMappingsFromFile( const( char )* file ) {
+    return SDL_GameControllerAddMappingsFromRW( SDL_RWFromFile( file, "rb" ), 1 );
 }
 
 // SDL_quit.h
@@ -596,6 +630,7 @@ __gshared {
     da_SDL_HasSSE3 SDL_HasSSE3;
     da_SDL_HasSSE41 SDL_HasSSE41;
     da_SDL_HasSSE42 SDL_HasSSE42;
+    da_SDL_HasAVX SDL_HasAVX;
     da_SDL_GetSystemRAM SDL_GetSystemRAM;
 
     da_SDL_SetError SDL_SetError;
@@ -620,6 +655,7 @@ __gshared {
     da_SDL_EventState SDL_EventState;
     da_SDL_RegisterEvents SDL_RegisterEvents;
 
+    da_SDL_GameControllerAddMappingsFromRW SDL_GameControllerAddMappingsFromRW;
     da_SDL_GameControllerAddMapping SDL_GameControllerAddMapping;
     da_SDL_GameControllerMappingForGUID SDL_GameControllerMappingForGUID;
     da_SDL_GameControllerMapping SDL_GameControllerMapping;
@@ -899,6 +935,30 @@ __gshared {
     da_SDL_UpperBlitScaled SDL_UpperBlitScaled;
     da_SDL_LowerBlitScaled SDL_LowerBlitScaled;
 
+    static if( Derelict_OS_Windows ) {
+        da_SDL_Direct3D9GetAdapterIndex SDL_Direct3D9GetAdapterIndex ;
+        da_SDL_RenderGetD3D9Device SDL_RenderGetD3D9Device;
+        da_SDL_DXGIGetOutputInfo SDL_DXGIGetOutputInfo;
+    }
+    static if( Derelict_OS_iOS ) {
+        da_SDL_iPhoneSetAnimationCallback SDL_iPhoneSetAnimationCallback;
+        da_SDL_iPhoneSetEventPump SDL_iPhoneSetEventPump;
+    }
+    static if( Derelict_OS_Android ) {
+        da_SDL_AndroidGetJNIEnv SDL_AndroidGetJNIEnv;
+        da_SDL_AndroidGetActivity SDL_AndroidGetActivity;
+
+        da_SDL_AndroidGetInternalStoragePath SDL_AndroidGetInternalStoragePath;
+        da_SDL_AndroidGetInternalStorageState SDL_AndroidGetInternalStorageState;
+        da_SDL_AndroidGetExternalStoragePath SDL_AndroidGetExternalStoragePath;
+    }
+    static if( Derelict_OS_WinRT ) {
+        da_SDL_WinRTGetFSPathUNICODE SDL_WinRTGetFSPathUNICODE;
+        da_SDL_WinRTGetFSPathUTF8 SDL_WinRTGetFSPathUTF8;
+    }
+
+    da_SDL_GetWindowWMInfo SDL_GetWindowWMInfo;
+
     da_SDL_GetTicks SDL_GetTicks;
     da_SDL_GetPerformanceCounter SDL_GetPerformanceCounter;
     da_SDL_GetPerformanceFrequency SDL_GetPerformanceFrequency;
@@ -975,6 +1035,7 @@ __gshared {
     da_SDL_GL_GetProcAddress SDL_GL_GetProcAddress;
     da_SDL_GL_UnloadLibrary SDL_GL_UnloadLibrary;
     da_SDL_GL_ExtensionSupported SDL_GL_ExtensionSupported;
+    da_SDL_GL_ResetAttributes SDL_GL_ResetAttributes;
     da_SDL_GL_SetAttribute SDL_GL_SetAttribute;
     da_SDL_GL_GetAttribute SDL_GL_GetAttribute;
     da_SDL_GL_CreateContext SDL_GL_CreateContext;

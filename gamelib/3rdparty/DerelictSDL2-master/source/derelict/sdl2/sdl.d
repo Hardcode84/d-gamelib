@@ -94,7 +94,7 @@ class DerelictSDL2Loader : SharedLibLoader {
             bindFunc( cast( void** )&SDL_CloseAudio, "SDL_CloseAudio" );
             bindFunc( cast( void** )&SDL_CloseAudioDevice, "SDL_CloseAudioDevice" );
             //            bindFunc( cast( void** )&SDL_AudioDeviceConnected, "SDL_AudioDeviceConnected" );
-            bindFunc( cast( void** )&SDL_SetClipboardText, "SDL_SetClipboardText" );
+              bindFunc( cast( void** )&SDL_SetClipboardText, "SDL_SetClipboardText" );
             bindFunc( cast( void** )&SDL_GetClipboardText, "SDL_GetClipboardText" );
             bindFunc( cast( void** )&SDL_HasClipboardText, "SDL_HasClipboardText" );
             bindFunc( cast( void** )&SDL_GetCPUCount, "SDL_GetCPUCount" );
@@ -108,6 +108,7 @@ class DerelictSDL2Loader : SharedLibLoader {
             bindFunc( cast( void** )&SDL_HasSSE3, "SDL_HasSSE3" );
             bindFunc( cast( void** )&SDL_HasSSE41, "SDL_HasSSE41" );
             bindFunc( cast( void** )&SDL_HasSSE42, "SDL_HasSSE42" );
+            bindFunc( cast( void** )&SDL_HasAVX, "SDL_HasAVX" );
             bindFunc( cast( void** )&SDL_GetSystemRAM, "SDL_GetSystemRAM" );
             bindFunc( cast( void** )&SDL_SetError, "SDL_SetError" );
             bindFunc( cast( void** )&SDL_GetError, "SDL_GetError" );
@@ -129,6 +130,7 @@ class DerelictSDL2Loader : SharedLibLoader {
             bindFunc( cast( void** )&SDL_FilterEvents, "SDL_FilterEvents" );
             bindFunc( cast( void** )&SDL_EventState, "SDL_EventState" );
             bindFunc( cast( void** )&SDL_RegisterEvents, "SDL_RegisterEvents" );
+            bindFunc( cast( void** )&SDL_GameControllerAddMappingsFromRW, "SDL_GameControllerAddMappingsFromRW" );
             bindFunc( cast( void** )&SDL_GameControllerAddMapping, "SDL_GameControllerAddMapping" );
             bindFunc( cast( void** )&SDL_GameControllerMappingForGUID, "SDL_GameControllerMappingForGUID" );
             bindFunc( cast( void** )&SDL_GameControllerMapping, "SDL_GameControllerMapping" );
@@ -388,6 +390,29 @@ class DerelictSDL2Loader : SharedLibLoader {
             bindFunc( cast( void** )&SDL_SoftStretch, "SDL_SoftStretch" );
             bindFunc( cast( void** )&SDL_UpperBlitScaled, "SDL_UpperBlitScaled" );
             bindFunc( cast( void** )&SDL_LowerBlitScaled, "SDL_LowerBlitScaled" );
+            static if( Derelict_OS_Windows ) {
+                bindFunc( cast( void** )&SDL_Direct3D9GetAdapterIndex, "SDL_Direct3D9GetAdapterIndex" ) ;
+                bindFunc( cast( void** )&SDL_RenderGetD3D9Device, "SDL_RenderGetD3D9Device" );
+                bindFunc( cast( void** )&SDL_DXGIGetOutputInfo, "SDL_DXGIGetOutputInfo" );
+            }
+            static if( Derelict_OS_iOS ) {
+                bindFunc( cast( void** )&SDL_iPhoneSetAnimationCallback, "SDL_iPhoneSetAnimationCallback" );
+                bindFunc( cast( void** )&SDL_iPhoneSetEventPump, "SDL_iPhoneSetEventPump" );
+            }
+            static if( Derelict_OS_Android ) {
+                bindFunc( cast( void** )&SDL_AndroidGetJNIEnv, "SDL_AndroidGetJNIEnv" );
+                bindFunc( cast( void** )&SDL_AndroidGetActivity, "SDL_AndroidGetActivity" );
+
+                bindFunc( cast( void** )&SDL_AndroidGetInternalStoragePath, "SDL_AndroidGetInternalStoragePath" );
+                bindFunc( cast( void** )&SDL_AndroidGetInternalStorageState, "SDL_AndroidGetInternalStorageState" );
+                bindFunc( cast( void** )&SDL_AndroidGetExternalStoragePath, "SDL_AndroidGetExternalStoragePath" );
+            }
+            static if( Derelict_OS_WinRT ) {
+                bindFunc( cast( void** )&SDL_WinRTGetFSPathUNICODE, "SDL_WinRTGetFSPathUNICODE" );
+                bindFunc( cast( void** )&SDL_WinRTGetFSPathUTF8, "SDL_WinRTGetFSPathUTF8" );
+            }
+
+            bindFunc( cast( void** )&SDL_GetWindowWMInfo, "SDL_GetWindowWMInfo" );
             bindFunc( cast( void** )&SDL_GetTicks, "SDL_GetTicks" );
             bindFunc( cast( void** )&SDL_GetPerformanceCounter, "SDL_GetPerformanceCounter" );
             bindFunc( cast( void** )&SDL_GetPerformanceFrequency, "SDL_GetPerformanceFrequency" );
@@ -461,6 +486,7 @@ class DerelictSDL2Loader : SharedLibLoader {
             bindFunc( cast( void** )&SDL_GL_GetProcAddress, "SDL_GL_GetProcAddress" );
             bindFunc( cast( void** )&SDL_GL_UnloadLibrary, "SDL_GL_UnloadLibrary" );
             bindFunc( cast( void** )&SDL_GL_ExtensionSupported, "SDL_GL_ExtensionSupported" );
+            bindFunc( cast( void** )&SDL_GL_ResetAttributes, "SDL_GL_ResetAttributes" );
             bindFunc( cast( void** )&SDL_GL_SetAttribute, "SDL_GL_SetAttribute" );
             bindFunc( cast( void** )&SDL_GL_GetAttribute, "SDL_GL_GetAttribute" );
             bindFunc( cast( void** )&SDL_GL_CreateContext, "SDL_GL_CreateContext" );
