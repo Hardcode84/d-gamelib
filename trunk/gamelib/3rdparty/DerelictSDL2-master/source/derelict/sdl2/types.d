@@ -30,6 +30,10 @@ module derelict.sdl2.types;
 private {
     import core.stdc.config;
     import core.stdc.stdio;
+    import derelict.util.system;
+
+    static if( Derelict_OS_Windows ) import derelict.util.wintypes;
+    static if( Derelict_OS_Posix ) import derelict.util.xtypes;
 }
 
 // SDL_version.h
@@ -42,7 +46,7 @@ struct SDL_version {
 enum : Uint8 {
     SDL_MAJOR_VERSION = 2,
     SDL_MINOR_VERSION = 0,
-    SDL_PATCHLEVEL = 1
+    SDL_PATCHLEVEL = 2,
 }
 
 void SDL_VERSION( SDL_version* x ) {
@@ -240,6 +244,12 @@ alias SDL_EventType = int;
 enum {
     SDL_FIRSTEVENT = 0,
     SDL_QUIT = 0x100,
+    SDL_APP_TERMINATING,
+    SDL_APP_LOWMEMORY,
+    SDL_APP_WILLENTERBACKGROUND,
+    SDL_APP_DIDENTERBACKGROUND,
+    SDL_APP_WILLENTERFOREGROUND,
+    SDL_APP_DIDENTERFOREGROUND,
     SDL_WINDOWEVENT = 0x200,
     SDL_SYSWMEVENT,
     SDL_KEYDOWN = 0x300,
@@ -271,6 +281,7 @@ enum {
     SDL_MULTIGESTURE,
     SDL_CLIPBOARDUPDATE = 0x900,
     SDL_DROPFILE = 0x1000,
+    SDL_RENDER_TARGETS_RESET = 0x2000,
     SDL_USEREVENT = 0x8000,
     SDL_LASTEVENT = 0xFFFF
 }
@@ -340,8 +351,8 @@ struct SDL_MouseButtonEvent {
     Uint32 which;
     Uint8 button;
     Uint8 state;
+    Uint8 clicks;
     Uint8 padding1;
-    Uint8 padding2;
     Sint32 x;
     Sint32 y;
 }
@@ -493,7 +504,6 @@ struct SDL_UserEvent {
     void* data2;
 }
 
-struct SDL_SysWMmsg;
 struct SDL_SysWMEvent {
     Uint32 type;
     Uint32 timestamp;
@@ -536,7 +546,7 @@ enum {
     SDL_GETEVENT
 }
 
-extern( C ) nothrow alias SDL_EventFilter = void function( void* userdata, SDL_Event* event );
+extern( C ) nothrow alias SDL_EventFilter = int function( void* userdata, SDL_Event* event );
 
 enum {
     SDL_QUERY = -1,
@@ -742,19 +752,26 @@ enum : string
     SDL_HINT_RENDER_DIRECT3D_THREADSAFE = "SDL_RENDER_DIRECT3D_THREADSAFE",
     SDL_HINT_RENDER_SCALE_QUALITY = "SDL_RENDER_SCALE_QUALITY",
     SDL_HINT_RENDER_VSYNC = "SDL_RENDER_VSYNC",
+    SDL_HINT_VIDEO_ALLOW_SCREENSAVER = "SDL_VIDEO_ALLOW_SCREENSAVER",
     SDL_HINT_VIDEO_X11_XVIDMODE = "SDL_VIDEO_X11_XVIDMODE",
     SDL_HINT_VIDEO_X11_XINERAMA = "SDL_VIDEO_X11_XINERAMA",
     SDL_HINT_VIDEO_X11_XRANDR = "SDL_VIDEO_X11_XRANDR",
     SDL_HINT_GRAB_KEYBOARD = "SDL_GRAB_KEYBOARD",
+    SDL_HINT_MOUSE_RELATIVE_MODE_WARP = "SDL_MOUSE_RELATIVE_MODE_WARP",
     SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS = "SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS",
     SDL_HINT_IDLE_TIMER_DISABLED = "SDL_IOS_IDLE_TIMER_DISABLED",
     SDL_HINT_ORIENTATIONS = "SDL_IOS_ORIENTATIONS",
+    SDL_HINT_ACCELEROMETER_AS_JOYSTICK = "SDL_ACCELEROMETER_AS_JOYSTICK",
     SDL_HINT_XINPUT_ENABLED = "SDL_XINPUT_ENABLED",
     SDL_HINT_GAMECONTROLLERCONFIG = "SDL_GAMECONTROLLERCONFIG",
     SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS = "SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS",
     SDL_HINT_ALLOW_TOPMOST = "SDL_ALLOW_TOPMOST",
     SDL_HINT_TIMER_RESOLUTION = "SDL_TIMER_RESOLUTION",
     SDL_HINT_VIDEO_HIGHDPI_DISABLED = "SDL_VIDEO_HIGHDPI_DISABLED",
+    SDL_HINT_MAC_CTRL_CLICK_EMULATE_RIGHT_CLICK = "SDL_MAC_CTRL_CLICK_EMULATE_RIGHT_CLICK",
+    SDL_HINT_VIDEO_WIN_D3DCOMPILER = "SDL_VIDEO_WIN_D3DCOMPILER",
+    SDL_HINT_VIDEO_WINDOW_SHARE_PIXEL_FORMAT = "SDL_VIDEO_WINDOW_SHARE_PIXEL_FORMAT",
+    SDL_HINT_VIDEO_MAC_FULLSCREEN_SPACES = "SDL_HINT_VIDEO_MAC_FULLSCREEN_SPACES",
 }
 
 alias SDL_HintPriority = int;
@@ -1911,6 +1928,140 @@ struct SDL_Surface {
 
 extern( C ) nothrow alias SDL_blit = int function( SDL_Surface* src, SDL_Rect* srcrect, SDL_Surface* dst, SDL_Rect* dstrect );
 
+// SDL_system.h
+static if( Derelict_OS_Windows ) {
+    struct IDirect3DDevice9;
+}
+static if( Derelict_OS_iOS ) {
+    extern( C ) nothrow alias SDL_iPhoneAnimationCallback = void function( void* );
+}
+static if( Derelict_OS_Android ) {
+    enum int SDL_ANDROID_EXTERNAL_STORAGE_READ  = 0x01;
+    enum int SDL_ANDROID_EXTERNAL_STORAGE_WRITE = 0x02;
+}
+static if( Derelict_OS_WinRT ) {
+    enum SDL_WinRT_Path {
+        SDL_WINRT_PATH_INSTALLED_LOCATION,
+        SDL_WINRT_PATH_LOCAL_FOLDER,
+        SDL_WINRT_PATH_ROAMING_FOLDER,
+        SDL_WINRT_PATH_TEMP_FOLDER
+    }
+}
+
+// SDL_syswm.h
+alias SDL_SYSWM_TYPE = int;
+enum {
+    SDL_SYSWM_UNKNOWN,
+    SDL_SYSWM_WINDOWS,
+    SDL_SYSWM_X11,
+    SDL_SYSWM_DIRECTFB,
+    SDL_SYSWM_COCOA,
+    SDL_SYSWM_UIKIT,
+    SDL_SYSWM_WAYLAND,
+    SDL_SYSWM_MIR,
+    SDL_SYSWM_WINRT,
+}
+
+struct SDL_SysWMmsg {
+    SDL_version version_;
+    SDL_SYSWM_TYPE subsystem;
+    union msg_ {
+        static if( Derelict_OS_Windows ) { // because wintypes types are only defined when compiling for Windows
+            // Win32
+            struct win_ {
+                HWND hwnd;
+                UINT msg;
+                WPARAM wParam;
+                LPARAM lParam;
+            }
+            win_ win;
+        }
+
+        static if( Derelict_OS_Posix ) {
+            // X11 unsupported for now
+            struct x11_ {
+                c_long[24] pad; // sufficient size for any X11 event
+            }
+            x11_ x11;
+        }
+
+        static if( Derelict_OS_Linux ) {
+            // DirectFB unsupported for now
+            // Consequently SDL_SysWMmsg might have a different size that in SDL
+            struct dfb_ {
+                void* event;
+            }
+            dfb_ dfb;
+        }
+    }
+    msg_ msg;
+}
+
+struct SDL_SysWMinfo {
+    SDL_version version_; // version is reserved in D
+    SDL_SYSWM_TYPE subsystem;
+
+    union info_ {
+        static if( Derelict_OS_Windows ) {
+            struct win_ {
+               HWND window;
+            }
+            win_ win;
+        }
+
+        static if( Derelict_OS_WinRT ) {
+            struct winrt_ {
+                void* window;
+            }
+            winrt_ winrt;
+        }
+
+        static if( Derelict_OS_Posix ) {
+            struct x11_ {
+                Display* display;
+                Window window;
+            }
+            x11_ x11;
+        }
+
+        // TODO not too sure about all the Derelict_OS tests below.
+        static if( Derelict_OS_Linux ) {
+            struct dfb_ {
+                void *dfb;
+                void *window;
+                void *surface;
+            }
+            dfb_ dfb;
+
+            struct wl_ {
+                void *display;
+                void *surface;
+                void *shell_surface;
+            }
+            wl_ wl;
+
+            struct mir_ {
+                void *connection;
+                void *surface;
+            }
+            mir_ mir;
+        }
+
+        static if( Derelict_OS_Mac || Derelict_OS_iOS ) {
+            struct cocoa_ {
+               void* window;
+            }
+            cocoa_ cocoa;
+
+            struct uikit_ {
+                void *window;
+            }
+            uikit_ uikit;
+        }
+    }
+    info_ info;
+}
+
 // SDL_timer.h
 extern( C ) nothrow alias SDL_TimerCallback = Uint32 function( Uint32 interval, void* param );
 alias SDL_TimerID = int;
@@ -2034,4 +2185,3 @@ enum {
     SDL_GL_CONTEXT_ROBUST_ACCESS_FLAG = 0x0004,
     SDL_GL_CONTEXT_RESET_ISOLATION_FLAG = 0x0008,
 }
-
