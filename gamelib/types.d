@@ -113,6 +113,11 @@ mixin template SDL_CHECK(string S, string getErr = "SDL_GetError()")
     auto temp = enforce(0 == (mixin(S)), "\"" ~ S ~ "\" failed: " ~ to!string(mixin(getErr)).idup);
 }
 
+mixin template SDL_CHECK_BOOL(string S, string getErr = "SDL_GetError()")
+{
+    auto temp = enforce(SDL_TRUE == (mixin(S)), "\"" ~ S ~ "\" failed: " ~ to!string(mixin(getErr)).idup);
+}
+
 mixin template SDL_CHECK_NULL(string S, string getErr = "SDL_GetError()")
 {
     auto temp = enforce(null != (mixin(S)), "\"" ~ S ~ "\" failed: " ~ to!string(mixin(getErr)).idup);
