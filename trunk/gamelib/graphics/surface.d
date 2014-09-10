@@ -1,5 +1,6 @@
 ﻿module gamelib.graphics.surface;
 
+import std.traits;
 import gamelib.types;
 
 import derelict.sdl2.sdl;
@@ -102,6 +103,12 @@ final:
         return mLockCount > 0;
     }
 
+    @property auto format() const pure nothrow
+    {
+        assert(mSurface);
+        return mSurface.format;
+    }
+
     void blit(Surface src)
     {
         assert(mSurface);
@@ -120,6 +127,7 @@ package:
         super(surf);
     }
 public:
+    alias ColorType = ColorT;
     this(int width,
          int height,
          void* pixels = null,
@@ -148,7 +156,7 @@ public:
         return view[y];
     }
 
-    void fill(in ColorT col)
+    void fill(T)(in T col) if(isAssignable!(ColorT, T))
     {
         assert(mSurface);
         union tempunion_t

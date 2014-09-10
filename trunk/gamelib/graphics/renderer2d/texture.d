@@ -73,7 +73,7 @@ public:
         return ret;
     }
 
-    @property void colorMod(in Color col)
+    @property void colorMod(ColT)(in ColT col)
     {
         assert(mTexture);
         mixin SDL_CHECK!(`SDL_SetTextureColorMod(mTexture, col.r, col.g, col.b)`);

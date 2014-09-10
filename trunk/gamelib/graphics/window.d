@@ -136,14 +136,77 @@ public:
         return enforceEx!ColorFormatException(cast(FFSurface!T)surface(), "Invalid pixel format: "~T.stringof);
     }
 
+    void blit(Surface surf)
+    {
+        version(Windows)
+        {
+            assert(mHDC);
+            const sz = size;
+            const fmt = surf.format;
+            struct tempstruct_t
+            {
+                BITMAPINFO bmi;
+                byte[RGBQUAD.sizeof * 255] data;
+            };
+            tempstruct_t s;
+            s.bmi.bmiHeader.biSize = s.bmi.bmiHeader.sizeof;
+            s.bmi.bmiHeader.biWidth = sz.x;
+            s.bmi.bmiHeader.biHeight = -sz.y;
+            s.bmi.bmiHeader.biPlanes = 1;
+            s.bmi.bmiHeader.biBitCount = fmt.BitsPerPixel;
+            s.bmi.bmiHeader.biCompression = 0;//BI_RGB;
+            s.bmi.bmiHeader.biSizeImage = 0;
+            s.bmi.bmiHeader.biXPelsPerMeter = 0;
+            s.bmi.bmiHeader.biYPelsPerMeter = 0;
+            s.bmi.bmiHeader.biClrUsed = 0;
+            s.bmi.bmiHeader.biClrImportant = 0;
+
+            if(fmt.BytesPerPixel > 1)
+            {
+                s.bmi.bmiHeader.biCompression = 3;//BI_BITFIELDS;
+                auto masks = cast(uint*)(s.bmi.bmiColors.ptr);
+                masks[0] = fmt.Rmask;
+                masks[1] = fmt.Gmask;
+                masks[2] = fmt.Bmask;
+            }
+            else
+            {
+                assert(false);//TODO: paletted formats
+            }
+            surf.lock;
+            scope(exit) surf.unlock;
+
+            enforce(0 != SetDIBitsToDevice(mHDC,
+                                           0,//xdest,
+                                           0,//ydest,
+                                           sz.x,//width,
+                                           sz.y,//height,
+                                           0,//xsrc,
+                                           0,//ysrc,
+                                           0,
+                                           sz.y,//height,
+                                           surf.data,
+                                           &s.bmi,
+                                           0/*DIB_RGB_COLORS*/));
+        }
+        else
+        {
+            surface.blit(surf);
+            mixin SDL_CHECK!(`SDL_UpdateWindowSurface(mWindow)`);
+        }
+    }
+
     void updateSurface(Surface surf = null)
     {
         assert(mWindow);
         if(surf !is null && surf !is mCachedSurf)
         {
-            surface.blit(surf);
+            blit(surf);
         }
-        mixin SDL_CHECK!(`SDL_UpdateWindowSurface(mWindow)`);
+        else
+        {
+            mixin SDL_CHECK!(`SDL_UpdateWindowSurface(mWindow)`);
+        }
     }
 
     @property auto formatString()

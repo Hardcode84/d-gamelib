@@ -270,8 +270,8 @@ struct Vector(type, int dimension_) {
         static assert(!__traits(compiles, vec4(0.0f, 0.0f, 0.0f)));
         static assert(!__traits(compiles, vec4(0.0f, vec2(0.0f, 0.0f))));
         static assert(!__traits(compiles, vec4(vec3(0.0f, 0.0f, 0.0f))));
-        import gamelib.fixedpoint;
-        Vector!(FixedPoint!(16,16,int),2) vfp16;
+        //import gamelib.fixedpoint;
+        //Vector!(FixedPoint!(16,16,int),2) vfp16;
     }
 
     template coord_to_index(char c) {   
@@ -917,10 +917,13 @@ struct Matrix(type, int rows_, int cols_) if((rows_ > 0) && (cols_ > 0)) {
     
     /// Returns true if all values are not nan and finite, otherwise false.
     @property bool isFinite() const {
-        foreach(row; matrix) {
-            foreach(col; row) {
-                if(isNaN(col) || isInfinity(col)) {
-                    return false;
+        static if(isFloatingPoint!mt)
+        {
+            foreach(row; matrix) {
+                foreach(col; row) {
+                    if(isNaN(col) || isInfinity(col)) {
+                        return false;
+                    }
                 }
             }
         }
