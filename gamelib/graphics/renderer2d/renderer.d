@@ -75,7 +75,7 @@ public:
         mixin SDL_CHECK!(`SDL_RenderCopyEx(mRenderer,tex.mTexture,srcRect,dstRect,angle,center,flip)`);
     }
 
-    @property void drawColor(in Color col)
+    @property void drawColor(ColT)(in ColT col)
     {
         assert(mRenderer);
         mixin SDL_CHECK!(`SDL_SetRenderDrawColor(mRenderer,col.r,col.g,col.b,col.a)`);

@@ -52,7 +52,7 @@ public:
                 return data[x];
             }
 
-            static if(M) auto opIndexAssign(in ElemT value, int x) pure nothrow
+            static if(M) auto opIndexAssign(T)(in T value, int x) pure nothrow if(isAssignable!(ElemT,T))
             {
                 checkCoord(x);
                 return data[x] = value;
@@ -66,7 +66,7 @@ public:
                 return data[x1..x2];
             }
 
-            static if(M) auto opSliceAssign(T)(in T val, int x1, int x2) pure nothrow if(M)
+            static if(M) auto opSliceAssign(T)(in T val, int x1, int x2) pure nothrow if(isAssignable!(ElemT,T))
             {
                 checkCoord(x1);
                 assert(x2 >= x1);

@@ -41,23 +41,52 @@ struct Size
     int w, h;
 }
 
-struct Color
+struct Color(bool bgra = false)
 {
-    ubyte r = 255;
-    ubyte g = 255;
-    ubyte b = 255;
-    ubyte a = SDL_ALPHA_OPAQUE;
-    enum format = SDL_PIXELFORMAT_RGBA8888;
-    enum Uint32 rmask = 0x000000ff;
-    enum Uint32 gmask = 0x0000ff00;
-    enum Uint32 bmask = 0x00ff0000;
-    enum Uint32 amask = 0xff000000;
+    import std.typetuple, std.string;
+    static if(bgra)
+    {
+        ubyte b = 255;
+        ubyte g = 255;
+        ubyte r = 255;
+        ubyte a = SDL_ALPHA_OPAQUE;
+    }
+    else
+    {
+        ubyte r = 255;
+        ubyte g = 255;
+        ubyte b = 255;
+        ubyte a = SDL_ALPHA_OPAQUE;
+    }
+    //enum format = SDL_PIXELFORMAT_RGBA8888;
+    static if(bgra)
+    {
+        enum Uint32 bmask = 0x000000ff;
+        enum Uint32 gmask = 0x0000ff00;
+        enum Uint32 rmask = 0x00ff0000;
+        enum Uint32 amask = 0xff000000;
+    }
+    else
+    {
+        enum Uint32 rmask = 0x000000ff;
+        enum Uint32 gmask = 0x0000ff00;
+        enum Uint32 bmask = 0x00ff0000;
+        enum Uint32 amask = 0xff000000;
+    }
+    ref Color opAssign(U)(in U x) pure nothrow
+    {
+        foreach(c;TypeTuple!('r','g','b','a'))
+        {
+            mixin(format("%1$s = x.%1$s;",c));
+        }
+        return this;
+    }
+
     static Color lerp(T)(in Color col1, in Color col2, in T coeff) pure nothrow
     {
         assert(coeff >= (0), debugConv(coeff));
         assert(coeff <= (1), debugConv(coeff));
         Color ret;
-        import std.typetuple, std.string;
         foreach(c;TypeTuple!('r','g','b'))
         {
             enum str = format("ret.%1$s = cast(ubyte)(col2.%1$s*(cast(T)1 - coeff) + col1.%1$s*coeff);",c);
@@ -96,12 +125,12 @@ struct Color
     }
 }
 
-enum Color ColorWhite = {r:255,g:255,b:255};
-enum Color ColorBlack = {r:0  ,g:0  ,b:0  };
-enum Color ColorGreen = {r:0  ,g:255,b:0  };
-enum Color ColorRed   = {r:255,g:0  ,b:0  };
-enum Color ColorBlue  = {r:0  ,g:0  ,b:255};
-enum Color ColorTransparentWhite = {r:255,g:255,b:255, a: 0};
+enum Color!true ColorWhite = {r:255,g:255,b:255};
+enum Color!true ColorBlack = {r:0  ,g:0  ,b:0  };
+enum Color!true ColorGreen = {r:0  ,g:255,b:0  };
+enum Color!true ColorRed   = {r:255,g:0  ,b:0  };
+enum Color!true ColorBlue  = {r:0  ,g:0  ,b:255};
+enum Color!true ColorTransparentWhite = {r:255,g:255,b:255, a: 0};
 
 template Tuple(E...)
 {
@@ -137,7 +166,8 @@ struct TemplateColor(int Size, uint rm = 0, uint gm = 0, uint bm = 0, uint am = 
 }
 
 alias I8Color = TemplateColor!1;
-alias RGBA8888Color = Color;
+alias RGBA8888Color = Color!false;
+alias BGRA8888Color = Color!true;
 
 unittest
 {
