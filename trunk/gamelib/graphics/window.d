@@ -22,6 +22,11 @@ final class Window
 package:
     SDL_Window* mWindow = null;
     Surface mCachedSurf = null;
+    version(Windows)
+    {
+        import core.sys.windows.windows;
+        HDC mHDC = null;
+    }
 public:
     this(in string title, in int width, in int height, Uint32 flags = 0)
     {
@@ -31,6 +36,12 @@ public:
                                    width,
                                    height,
                                    flags)`);
+        SDL_SysWMinfo info;
+        mixin SDL_CHECK_BOOL!(`SDL_GetWindowWMInfo(mWindow,&info)`);
+        version(Windows)
+        {
+            mHDC = enforce(GetDC(info.info.win.window), "Unable to get HDC");
+        }
     }
 
     ~this() const pure nothrow
@@ -52,8 +63,16 @@ public:
 
     void dispose() nothrow
     {
+
         if(mWindow)
         {
+            version(Windows)
+            {
+                if(mHDC)
+                {
+                    ReleaseDC(mWindow,mHDC);
+                }
+            }
             SDL_DestroyWindow(mWindow);
             mWindow = null;
             if(mCachedSurf)
@@ -114,7 +133,7 @@ public:
 
     @property auto surface(T)()
     {
-        return enforce(cast(FFSurface!T)surface(), new ColorFormatException("Invalid pixel format: "~T.stringof));
+        return enforceEx!ColorFormatException(cast(FFSurface!T)surface(), "Invalid pixel format: "~T.stringof);
     }
 
     void updateSurface(Surface surf = null)
