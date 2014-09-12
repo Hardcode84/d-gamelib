@@ -118,6 +118,22 @@ struct Color(bool bgra = false)
         u.i = i;
         return u.c;
     }
+    auto opBinary(string op : "+")(in Color rhs) const pure nothrow
+    {
+        return fromRaw(toRaw() + rhs.toRaw());
+    }
+
+    auto opBinary(string op : "*",T)(in T rhs) const pure nothrow
+    {
+        Color ret;
+        foreach(c;TypeTuple!('r','g','b'))
+        {
+            enum str = format("ret.%1$s = cast(ubyte)(%1$s*rhs);",c);
+            mixin(str);
+        }
+        return ret;
+    }
+
     static Color average(in Color col1,in Color col2) pure nothrow
     {
         return Color.fromRaw(((col1.toRaw() & 0xfefefefe) >> 1) +
