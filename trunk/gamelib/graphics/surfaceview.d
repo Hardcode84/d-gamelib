@@ -58,7 +58,15 @@ public:
                 return data[x] = value;
             }
 
-            auto opSlice(int x1, int x2) inout pure nothrow
+            auto opSlice(int x1, int x2) pure nothrow
+            {
+                checkCoord(x1);
+                assert(x2 >= x1);
+                debug assert(x2 <= width);
+                return data[x1..x2];
+            }
+
+            auto opSlice(int x1, int x2) const pure nothrow
             {
                 checkCoord(x1);
                 assert(x2 >= x1);

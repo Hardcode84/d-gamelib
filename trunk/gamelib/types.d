@@ -1,5 +1,7 @@
 module gamelib.types;
 
+import std.range;
+
 public import std.conv: to;
 public import std.exception: enforce;
 
@@ -36,6 +38,7 @@ auto debugConv(T)(auto ref T val) pure nothrow @trusted
     return "";
 }
 
+@nogc:
 struct Size
 {
     int w, h;
@@ -118,12 +121,12 @@ struct Color(bool bgra = false)
         u.i = i;
         return u.c;
     }
-    auto opBinary(string op : "+")(in Color rhs) const pure nothrow
+    auto opBinary(string op : "+")(in Color rhs) const pure nothrow @nogc
     {
         return fromRaw(toRaw() + rhs.toRaw());
     }
 
-    auto opBinary(string op : "*",T)(in T rhs) const pure nothrow
+    auto opBinary(string op : "*",T)(in T rhs) const pure nothrow @nogc
     {
         Color ret;
         foreach(c;TypeTuple!('r','g','b'))
@@ -138,6 +141,39 @@ struct Color(bool bgra = false)
     {
         return Color.fromRaw(((col1.toRaw() & 0xfefefefe) >> 1) +
                              ((col2.toRaw() & 0xfefefefe) >> 1));
+    }
+
+    static void interpolateLine(int LineSize, Rng)(auto ref Rng rng, in Color col1, in Color col2) pure nothrow 
+        if(isRandomAccessRange!Rng)
+    {
+        /*foreach(i;0..LineSize)
+        {
+            rng[i] = lerp(col2,col1, cast(float)i / cast(float)LineSize);
+        }*/
+        import gamelib.math;
+        static assert(ispow2(LineSize));
+        static if(8 == LineSize) //hack
+        {
+            rng[0] = col1;
+            rng[4] = average(col1,col2);
+            rng[2] = average(col1,rng[4]);
+            rng[1] = average(col1,rng[2]);
+            rng[3] = average(rng[2],rng[4]);
+            rng[6] = average(rng[4],col2);
+            rng[5] = average(rng[4],rng[6]);
+            rng[7] = average(rng[6],col2);
+        }
+        else static if(LineSize > 1)
+        {
+            enum pos = LineSize / 2;
+            rng[pos] = average(col1,col2);
+            interpolateLine!(pos)(rng[0..pos],col1,rng[pos]);
+            interpolateLine!(pos)(rng[pos..$],rng[pos],col2);
+        }
+        else
+        {
+            rng[0] = average(col1,col2);
+        }
     }
 }
 
