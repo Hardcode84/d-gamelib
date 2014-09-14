@@ -25,7 +25,7 @@ module gamelib.linalg;
 
 private {
     import std.conv : to;
-    import std.traits : isFloatingPoint, isStaticArray, isDynamicArray, isImplicitlyConvertible, isArray, isIntegral;
+    import std.traits : isFloatingPoint, isStaticArray, isDynamicArray, isImplicitlyConvertible, isArray, isIntegral, isAssignable;
     import std.string : format, rightJustify;
     import std.array : join;
     import std.algorithm : max, min, reduce;
@@ -139,7 +139,7 @@ struct Vector(type, int dimension_) {
     private void construct(int i, T, Tail...)(T head, Tail tail) {
         static if(i >= dimension) {
             static assert(false, "Too many arguments passed to constructor: " ~ to!string(i));
-        } else static if(is(T : vt)) {
+        } else static if(isAssignable!(vt,T)) {
             vector[i] = head;
             construct!(i + 1)(tail);
         } else static if(isDynamicArray!T) {
@@ -1816,7 +1816,7 @@ struct Matrix(type, int rows_, int cols_) if((rows_ > 0) && (cols_ > 0)) {
     
     Vector!(mt, rows) opBinary(string op : "*", T : Vector!(mt, cols))(T inp) const {
         Vector!(mt, rows) ret;
-        ret.clear(0);
+        ret.clear(cast(mt)0);
 
         foreach(c; TupleRange!(0, cols)) {
             foreach(r; TupleRange!(0, rows)) {

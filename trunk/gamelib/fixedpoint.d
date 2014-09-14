@@ -80,7 +80,7 @@ public:
         return this;
     }
 
-    ref FixedPoint opAssign(U)(in U x) pure nothrow if (is(U: FixedPoint!(M1, N1, T1), int M1, int N1, T1))
+    ref FixedPoint opAssign(U)(in U x) pure nothrow if (isFixedPoint!U)
     {
         enum shift = frac_part - U.frac_part;
         static if(0 == shift && int_part == U.int_part)
@@ -487,12 +487,13 @@ out(result)
 }
 body
 {
+    alias T = Unqual!U;
     static if(16 == U.int_part && 16 == U.frac_part)
     {
         //fixed point hypot from TarasB
-        U dx = abs(x);
-        U dy = abs(y);
-        U result;
+        T dx = abs(x);
+        T dy = abs(y);
+        T result;
         if (dx>dy) 
         {
             dy = (dy>>1) - (dx>>3);
@@ -506,7 +507,7 @@ body
 
         if (result.value>=5)
         {
-            U revr = 1/result;
+            T revr = 1/result;
             return (result + x*(x*revr)+y*(y*revr))>>1;
         } 
         else
@@ -518,9 +519,9 @@ body
     {
         if(0 == x && 0 == y) return cast(U)0;
         import gamelib.math: min, max;
-        U x1 = abs(x);
-        U y1 = abs(y);
-        U t = min(x1,y1);
+        T x1 = abs(x);
+        T y1 = abs(y);
+        T t = min(x1,y1);
         x1 = max(x1,y1);
         assert(x1 != 0);
         t = t / x1;
