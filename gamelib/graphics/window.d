@@ -107,15 +107,15 @@ public:
             }
             else
             {
-                alias Types32 = TypeTuple!(RGBA8888Color); //TODO: more formats
+                alias Types32 = TypeTuple!(RGBA8888Color,BGRA8888Color); //TODO: more formats
                 foreach(f;Types32)
                 {
                     if((mCachedSurf is null) &&
                        (f.sizeof == fmt.BytesPerPixel) &&
-                       (f.rmask == fmt.Rmask) &&
-                       (f.gmask == fmt.Gmask) &&
-                       (f.bmask == fmt.Bmask) &&
-                       (f.amask == fmt.Amask))
+                       (f.rmask  == fmt.Rmask) &&
+                       (f.gmask  == fmt.Gmask) &&
+                       (f.bmask  == fmt.Bmask)/* &&
+                       (f.amask  == fmt.Amask)*/)
                     {
                         mCachedSurf = new FFSurface!f(surf);
                     }
