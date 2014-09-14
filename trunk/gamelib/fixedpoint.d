@@ -3,6 +3,7 @@
 import std.traits;
 
 import gamelib.util;
+import gamelib.types;
 
 @safe:
 
@@ -286,7 +287,7 @@ private:
 
     static value_t shorten(T)(in T i) @trusted pure nothrow if(isIntegral!T)
     {
-        assert(isOk(i));
+        assert(isOk(i), debugConv(i));
         return cast(value_t)i;
     }
     

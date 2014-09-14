@@ -37,8 +37,8 @@ auto debugConv(T)(auto ref T val) pure nothrow @trusted
     }
     return "";
 }
-
 @nogc:
+
 struct Size
 {
     int w, h;
@@ -121,12 +121,12 @@ struct Color(bool bgra = false)
         u.i = i;
         return u.c;
     }
-    auto opBinary(string op : "+")(in Color rhs) const pure nothrow @nogc
+    auto opBinary(string op : "+")(in Color rhs) const pure nothrow
     {
         return fromRaw(toRaw() + rhs.toRaw());
     }
 
-    auto opBinary(string op : "*",T)(in T rhs) const pure nothrow @nogc
+    auto opBinary(string op : "*",T)(in T rhs) const pure nothrow
     {
         Color ret;
         foreach(c;TypeTuple!('r','g','b'))
