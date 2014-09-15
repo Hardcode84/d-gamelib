@@ -175,6 +175,17 @@ struct Color(bool bgra = false)
             rng[0] = average(col1,col2);
         }
     }
+
+    static void interpolateLine(Rng)(int lineSize, auto ref Rng rng, in Color col1, in Color col2) pure nothrow 
+        if(isRandomAccessRange!Rng)
+    {
+        if(lineSize <= 1) return;
+        const col = average(col1, col2);
+        const center = lineSize / 2;
+        rng[center] = col;
+        interpolateLine(center, rng[0..center],col1,col);
+        interpolateLine(center, rng[center..$],col,col2);
+    }
 }
 
 enum Color!true ColorWhite = {r:255,g:255,b:255};
