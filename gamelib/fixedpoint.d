@@ -6,6 +6,19 @@ import gamelib.util;
 import gamelib.types;
 
 @safe:
+@nogc:
+private int hackTrunc(int Order)(in float val) pure nothrow @trusted
+{
+    union u_t
+    {
+        double f;
+        int i;
+    }
+    u_t u;
+    u.f = cast(double)val;
+    u.f += cast(double) (cast(long)(3) << (51-Order));
+    return u.i;
+}
 
 struct FixedPoint(int M, int N, T)
 {
@@ -104,7 +117,14 @@ public:
     
     ref FixedPoint opAssign(U)(in U x) pure nothrow if (isFloatingPoint!U)
     {
-        value = shorten(cast(inter_t)(x * ONE)); // truncation
+        static if(is(value_t : int) && is(U : float))
+        {
+            value = hackTrunc!M(x);
+        }
+        else
+        {
+            value = shorten(cast(inter_t)(x * ONE)); // truncation
+        }
         return this;
     }
     
@@ -537,9 +557,17 @@ void testFixedPointFuncs(U)()
     enum precision = fix.fromRaw(25,65536);
     import gamelib.math: almost_equal, min, max;
 
+    fix a, b;
+    //initialization
+    foreach(i;0..100)
+    {
+        a = 1 * i + i;
+        b = 1.0f * i + i;
+        assert(a == b);
+    }
     //abs
-    fix a = 123;
-    fix b = abs(a);
+    a = 123;
+    b = abs(a);
     assert(a == b);
     assert(123 == b);
     a = -123;
