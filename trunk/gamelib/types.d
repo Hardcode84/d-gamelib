@@ -22,7 +22,20 @@ private string convImpl(T)(in T val) pure nothrow @trusted
         }
         catch(Exception e) {}
     }
-    return "";            
+    return "";
+}
+
+private void outImpl(T)(in T val) pure nothrow @trusted
+{
+    debug
+    {
+        try
+        {
+            import std.stdio;
+            writeln(val);
+        }
+        catch(Exception e) {}
+    }
 }
 
 @nogc:
@@ -30,12 +43,8 @@ void debugOut(T)(in T val) pure nothrow @trusted
 {
     debug
     {
-        import std.stdio;
-        try
-        {
-            writeln(val);
-        }
-        catch(Exception e) {}
+        alias fn_t = string function(in T) pure nothrow @nogc;
+        (cast(fn_t)&outImpl!T)(val); //hack to add @nogc
     }
 }
 

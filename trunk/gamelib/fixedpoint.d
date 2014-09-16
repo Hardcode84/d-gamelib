@@ -119,7 +119,7 @@ public:
     {
         static if(is(value_t : int) && is(U : float))
         {
-            value = hackTrunc!M(x);
+            value = hackTrunc!N(x);
         }
         else
         {
@@ -554,6 +554,7 @@ body
 void testFixedPointFuncs(U)()
 {
     alias fix = U;
+
     enum precision = fix.fromRaw(25,65536);
     import gamelib.math: almost_equal, min, max;
 
@@ -563,7 +564,7 @@ void testFixedPointFuncs(U)()
     {
         a = 1 * i + i;
         b = 1.0f * i + i;
-        assert(a == b);
+        assert(a == b, debugConv(i));
     }
     //abs
     a = 123;
@@ -645,5 +646,5 @@ void testFixedPointFuncs(U)()
 unittest
 {
     testFixedPointFuncs!(FixedPoint!(16,16,int))();
-    //testFixedPointFuncs!(FixedPoint!(8,24,int))();
+    //testFixedPointFuncs!(FixedPoint!(24,8,int))();
 }
