@@ -11,7 +11,22 @@ public import derelict.sdl2.image;
 alias SDL_Point Point;
 alias SDL_Rect Rect;
 
-void debugOut(T)(auto ref T val) pure nothrow @trusted
+private string convImpl(T)(in T val) pure nothrow @trusted
+{
+    debug
+    {
+        try
+        {
+            import std.conv;
+            return text(val);
+        }
+        catch(Exception e) {}
+    }
+    return "";            
+}
+
+@nogc:
+void debugOut(T)(in T val) pure nothrow @trusted
 {
     debug
     {
@@ -24,16 +39,12 @@ void debugOut(T)(auto ref T val) pure nothrow @trusted
     }
 }
 
-auto debugConv(T)(auto ref T val) pure nothrow @trusted
+auto debugConv(T)(in T val) pure nothrow @trusted
 {
     debug
     {
-        import std.conv;
-        try
-        {
-            return text(val);
-        }
-        catch(Exception e) {}
+        alias fn_t = string function(in T) pure nothrow @nogc;
+        return (cast(fn_t)&convImpl!T)(val); //hack to add @nogc
     }
     return "";
 }
@@ -87,8 +98,8 @@ struct Color(bool bgra = false)
 
     static Color lerp(T)(in Color col1, in Color col2, in T coeff) pure nothrow
     {
-        assert(coeff >= (0), debugConv(coeff));
-        assert(coeff <= (1), debugConv(coeff));
+        //assert(coeff >= (0), debugConv(coeff));
+        //assert(coeff <= (1), debugConv(coeff));
         Color ret;
         foreach(c;TypeTuple!('r','g','b'))
         {
