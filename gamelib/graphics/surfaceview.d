@@ -2,9 +2,11 @@
 
 import std.traits;
 
-struct SurfaceView(ElemT)
+struct SurfaceView(ElemT,int TileW = 1,int TileH = 1)
 {
 private:
+    static assert(TileW > 0);
+    static assert(TileH > 0);
     immutable int    mWidth;
     immutable int    mHeight;
     immutable size_t mPitch;
