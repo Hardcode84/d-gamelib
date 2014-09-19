@@ -22,7 +22,7 @@ public:
         mWidth  = surf.width;
         mHeight = surf.height;
         mPitch  = surf.pitch;
-        mData   = surf.data;
+        mData   = cast(typeof(mData))surf.data;
     }
 
     auto opIndex(int y) inout pure nothrow

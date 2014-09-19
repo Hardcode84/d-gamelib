@@ -11,18 +11,17 @@ public import derelict.sdl2.image;
 alias SDL_Point Point;
 alias SDL_Rect Rect;
 
-private string convImpl(T)(in T val) pure nothrow @trusted
+pragma(msg, "foo");
+pragma(msg, __VERSION__);
+pragma(msg, "bar");
+static if( __VERSION__ < 2066 )
 {
-    debug
-    {
-        try
-        {
-            import std.conv;
-            return text(val);
-        }
-        catch(Exception e) {}
-    }
-    return "";
+    enum HasNogc = false;
+    enum nogc = 1;
+}
+else
+{
+    enum HasNogc = true;
 }
 
 private void outImpl(T)(in T val) pure nothrow @trusted
@@ -38,13 +37,36 @@ private void outImpl(T)(in T val) pure nothrow @trusted
     }
 }
 
+private string convImpl(T)(in T val) pure nothrow @trusted
+{
+    debug
+    {
+        try
+        {
+            import std.conv;
+            return text(val);
+        }
+        catch(Exception e) {}
+    }
+    return "";
+}
+
 @nogc:
 void debugOut(T)(in T val) pure nothrow @trusted
 {
     debug
     {
-        alias fn_t = string function(in T) pure nothrow @nogc;
-        (cast(fn_t)&outImpl!T)(val); //hack to add @nogc
+        static if(HasNogc)
+        {
+            //dirty hack to shut up compiler
+            mixin(`
+            alias fn_t = string function(in T) pure nothrow @nogc;
+            (cast(fn_t)&outImpl!T)(val); //hack to add @nogc`);
+        }
+        else
+        {
+            outImpl(val);
+        }
     }
 }
 
@@ -52,8 +74,17 @@ auto debugConv(T)(in T val) pure nothrow @trusted
 {
     debug
     {
-        alias fn_t = string function(in T) pure nothrow @nogc;
-        return (cast(fn_t)&convImpl!T)(val); //hack to add @nogc
+        static if(HasNogc)
+        {
+            //dirty hack to shut up compiler
+            mixin(`
+            alias fn_t = string function(in T) pure nothrow @nogc;
+            return (cast(fn_t)&convImpl!T)(val); //hack to add @nogc`);
+        }
+        else
+        {
+            convImpl(val);
+        }
     }
     return "";
 }
