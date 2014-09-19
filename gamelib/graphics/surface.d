@@ -50,7 +50,7 @@ final:
         assert(!mSurface);
     }
 
-    void dispose() nothrow @nogc
+    @nogc void dispose() nothrow 
     {
         if(mSurface)
         {
@@ -63,15 +63,15 @@ final:
         }
     }
 
-    @property auto width()  const pure nothrow @nogc { return mWidth; }
-    @property auto height() const pure nothrow @nogc { return mHeight; }
-    @property auto data()   inout pure nothrow @nogc
+    @nogc @property auto width()  const pure nothrow { return mWidth; }
+    @nogc @property auto height() const pure nothrow { return mHeight; }
+    @nogc @property auto data()   inout pure nothrow
     {
         assert(mSurface);
         assert(isLocked);
         return mSurface.pixels;
     }
-    @property auto pitch() const pure nothrow @nogc
+    @nogc @property auto pitch() const pure nothrow
     {
         assert(mSurface);
         assert(isLocked);
@@ -97,14 +97,14 @@ final:
         }
         --mLockCount;
     }
-    @property bool isLocked() const pure nothrow @nogc
+    @nogc @property bool isLocked() const pure nothrow
     {
         assert(mSurface);
         assert(mLockCount >= 0);
         return mLockCount > 0;
     }
 
-    @property auto format() const pure nothrow @nogc
+    @nogc @property auto format() const pure nothrow
     {
         assert(mSurface);
         return mSurface.format;
@@ -149,7 +149,7 @@ public:
         }
     }
 
-    final auto opIndex(int y) pure nothrow @nogc
+    @nogc final auto opIndex(int y) pure nothrow
     {
         assert(isLocked);
         import gamelib.graphics.surfaceview;
