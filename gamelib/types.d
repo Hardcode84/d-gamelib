@@ -11,9 +11,6 @@ public import derelict.sdl2.image;
 alias SDL_Point Point;
 alias SDL_Rect Rect;
 
-pragma(msg, "foo");
-pragma(msg, __VERSION__);
-pragma(msg, "bar");
 static if( __VERSION__ < 2066 )
 {
     enum HasNogc = false;
