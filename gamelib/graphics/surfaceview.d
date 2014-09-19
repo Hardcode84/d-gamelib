@@ -3,8 +3,10 @@
 import std.traits;
 import gamelib.types;
 
+@nogc:
 struct SurfaceView(ElemT,int TileW = 1,int TileH = 1)
 {
+@nogc:
 private:
     static assert(TileW > 0);
     static assert(TileH > 0);
