@@ -1,6 +1,7 @@
 ﻿module gamelib.graphics.surfaceview;
 
 import std.traits;
+import gamelib.types;
 
 struct SurfaceView(ElemT,int TileW = 1,int TileH = 1)
 {
@@ -41,9 +42,9 @@ public:
                 assert(x >= 0);
                 debug
                 {
-                    assert(x < width);
-                    assert(y >= 0);
-                    assert(y < height);
+                    assert(x < width,  debugConv(x));
+                    assert(y >= 0,     debugConv(y));
+                    assert(y < height, debugConv(y));
                 }
             }
         public:

@@ -20,12 +20,15 @@ public:
     }
     body
     {
-        mData = new ElemT[w * h];
+        mData = new ElemT[w * h].ptr;
         mWidth = w;
         mHeight = h;
         mPitch = ElemT.sizeof * mWidth;
     }
-    @property auto inout data() const pure nothrow { return mData; }
+    @property auto   width()  const pure nothrow { return mWidth; }
+    @property auto   height() const pure nothrow { return mHeight; }
+    @property size_t pitch()  const pure nothrow { return mPitch; }
+    @property auto   data()   inout const pure nothrow { return mData; }
 
     final auto opIndex(int y) pure nothrow
     {
