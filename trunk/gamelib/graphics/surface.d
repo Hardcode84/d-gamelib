@@ -5,6 +5,7 @@ import gamelib.types;
 
 import derelict.sdl2.sdl;
 
+@nogc:
 class Surface
 {
 package:
@@ -49,7 +50,7 @@ final:
         assert(!mSurface);
     }
 
-    void dispose() nothrow
+    void dispose() nothrow @nogc
     {
         if(mSurface)
         {
@@ -62,15 +63,15 @@ final:
         }
     }
 
-    @property auto width()  const pure nothrow { return mWidth; }
-    @property auto height() const pure nothrow { return mHeight; }
-    @property auto data()   inout pure nothrow 
+    @property auto width()  const pure nothrow @nogc { return mWidth; }
+    @property auto height() const pure nothrow @nogc { return mHeight; }
+    @property auto data()   inout pure nothrow @nogc
     {
         assert(mSurface);
         assert(isLocked);
         return mSurface.pixels;
     }
-    @property auto pitch() const pure nothrow
+    @property auto pitch() const pure nothrow @nogc
     {
         assert(mSurface);
         assert(isLocked);
@@ -96,14 +97,14 @@ final:
         }
         --mLockCount;
     }
-    @property bool isLocked() const pure nothrow
+    @property bool isLocked() const pure nothrow @nogc
     {
         assert(mSurface);
         assert(mLockCount >= 0);
         return mLockCount > 0;
     }
 
-    @property auto format() const pure nothrow
+    @property auto format() const pure nothrow @nogc
     {
         assert(mSurface);
         return mSurface.format;
@@ -148,7 +149,7 @@ public:
         }
     }
 
-    final auto opIndex(int y) pure nothrow
+    final auto opIndex(int y) pure nothrow @nogc
     {
         assert(isLocked);
         import gamelib.graphics.surfaceview;
