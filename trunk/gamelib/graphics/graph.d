@@ -197,3 +197,30 @@ void downsample(BitmapT)(BitmapT dst, BitmapT src)
         }
     }
 }
+
+@nogc void ditherColorLine(LineT,ColT)(auto ref LineT line, int x0, int x1, int y, in ColT col1, in ColT col2) pure nothrow
+{
+    enum W = 8;
+    enum H = 8;
+    immutable ColT[2] cols = [col1, col2];
+    static immutable patterns = [
+        [0,0,0,0,1,1,1,1],
+        [0,0,0,1,0,1,1,1],
+        [0,0,1,0,1,0,1,1],
+        [0,1,0,1,0,1,0,1],
+        
+        [0,0,1,0,1,0,1,1],
+        [0,1,0,1,0,1,0,1],
+        [0,0,1,0,1,0,1,1],
+        [0,0,0,1,0,1,1,1]];
+    static assert(patterns.length    == H);
+    static assert(patterns[0].length == W);
+    const p = patterns[y % H];
+    auto l = line[x0..x1];
+    foreach(x;0..l.length)
+    {
+        const xw = x % W;
+        l[x] = cols[p[xw]];
+    }
+    //ColT.interpolateLine!H(line[x0..x1],col1,col2);
+}
