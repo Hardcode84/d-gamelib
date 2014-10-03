@@ -3,6 +3,7 @@
 import std.traits: Unqual;
 import std.range: isRandomAccessRange;
 
+import gamelib.types;
 import gamelib.math;
 import gamelib.util;
 
