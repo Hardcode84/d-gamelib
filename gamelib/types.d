@@ -232,11 +232,11 @@ struct Color(bool bgra = false)
             rng[i] = lerp(col2,col1, cast(float)i / cast(float)lineSize);
         }*/
         if(lineSize <= 1) return;
+        const center = lineSize / 2;
         const col = average(col1, col2);
-        const center = (lineSize + 1) / 2;
         rng[center] = col;
         interpolateLine(center, rng[0..center],col1,col);
-        interpolateLine(center, rng[center..$],col,col2);
+        interpolateLine(lineSize - center, rng[center..$],col ,col2);
     }
 }
 
