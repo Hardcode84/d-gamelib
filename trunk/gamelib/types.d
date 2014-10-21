@@ -227,9 +227,13 @@ struct Color(bool bgra = false)
     static void interpolateLine(Rng)(int lineSize, auto ref Rng rng, in Color col1, in Color col2) pure nothrow 
         if(isRandomAccessRange!Rng)
     {
+        /*foreach(i;0..lineSize)
+        {
+            rng[i] = lerp(col2,col1, cast(float)i / cast(float)lineSize);
+        }*/
         if(lineSize <= 1) return;
         const col = average(col1, col2);
-        const center = lineSize / 2;
+        const center = (lineSize + 1) / 2;
         rng[center] = col;
         interpolateLine(center, rng[0..center],col1,col);
         interpolateLine(center, rng[center..$],col,col2);
