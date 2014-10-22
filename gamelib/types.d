@@ -135,8 +135,8 @@ struct Color(bool bgra = false)
 
     static Color lerp(T)(in Color col1, in Color col2, in T coeff) pure nothrow
     {
-        //assert(coeff >= (0), debugConv(coeff));
-        //assert(coeff <= (1), debugConv(coeff));
+        assert(coeff >= (0), debugConv(coeff));
+        assert(coeff <= (1), debugConv(coeff));
         Color ret;
         foreach(c;TypeTuple!('r','g','b'))
         {
