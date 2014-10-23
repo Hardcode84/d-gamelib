@@ -41,7 +41,7 @@ public:
             
             void checkCoord(int x) const pure nothrow
             {
-                assert(x >= 0);
+                assert(x >= 0, debugConv(x));
                 debug
                 {
                     assert(x < width,  debugConv(x));
