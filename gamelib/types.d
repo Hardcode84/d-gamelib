@@ -191,7 +191,7 @@ struct Color(bool bgra = false)
                              ((col2.toRaw() & 0xfefefefe) >> 1));
     }
 
-    static @nogc void interpolateLine(int LineSize, Rng)(Rng rng, in Color col1, in Color col2) pure nothrow 
+    @nogc static void interpolateLine(int LineSize, Rng)(Rng rng, in Color col1, in Color col2) pure nothrow 
         if(isRandomAccessRange!Rng)
     {
         /*foreach(i;0..LineSize)
@@ -223,7 +223,7 @@ struct Color(bool bgra = false)
         }
     }
 
-    static @nogc void interpolateLine(Rng)(int lineSize, Rng rng, in Color col1, in Color col2) pure nothrow 
+    @nogc static void interpolateLine(Rng)(int lineSize, Rng rng, in Color col1, in Color col2) pure nothrow 
         if(isRandomAccessRange!Rng)
     {
         assert(lineSize >= 0);
@@ -248,7 +248,7 @@ struct Color(bool bgra = false)
         }
     }
 
-    private @nogc static void interpolateLineImpl(Rng)(int lineSize, Rng rng, in Color col1, in Color col2) pure nothrow 
+    @nogc private static void interpolateLineImpl(Rng)(int lineSize, Rng rng, in Color col1, in Color col2) pure nothrow 
         if(isRandomAccessRange!Rng)
     {
         /*foreach(i;0..lineSize)
