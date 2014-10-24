@@ -191,7 +191,7 @@ struct Color(bool bgra = false)
                              ((col2.toRaw() & 0xfefefefe) >> 1));
     }
 
-    static void interpolateLine(int LineSize, Rng)(auto ref Rng rng, in Color col1, in Color col2) pure nothrow 
+    static @nogc void interpolateLine(int LineSize, Rng)(Rng rng, in Color col1, in Color col2) pure nothrow 
         if(isRandomAccessRange!Rng)
     {
         /*foreach(i;0..LineSize)
@@ -199,7 +199,6 @@ struct Color(bool bgra = false)
             rng[i] = lerp(col2,col1, cast(float)i / cast(float)LineSize);
         }*/
         import gamelib.math;
-        static assert(ispow2(LineSize));
         static if(8 == LineSize) //hack
         {
             rng[0] = col1;
@@ -216,7 +215,7 @@ struct Color(bool bgra = false)
             enum pos = LineSize / 2;
             rng[pos] = average(col1,col2);
             interpolateLine!(pos)(rng[0..pos],col1,rng[pos]);
-            interpolateLine!(pos)(rng[pos..$],rng[pos],col2);
+            interpolateLine!(LineSize - pos)(rng[pos..$],rng[pos],col2);
         }
         else
         {
@@ -224,7 +223,32 @@ struct Color(bool bgra = false)
         }
     }
 
-    static void interpolateLine(Rng)(int lineSize, auto ref Rng rng, in Color col1, in Color col2) pure nothrow 
+    static @nogc void interpolateLine(Rng)(int lineSize, Rng rng, in Color col1, in Color col2) pure nothrow 
+        if(isRandomAccessRange!Rng)
+    {
+        assert(lineSize >= 0);
+        alias fn_pt = typeof(&interpolateLine!(0,Rng));
+        static immutable fn_pt[9] f = [
+            &interpolateLine!(0,Rng),
+            &interpolateLine!(1,Rng),
+            &interpolateLine!(2,Rng),
+            &interpolateLine!(3,Rng),
+            &interpolateLine!(4,Rng),
+            &interpolateLine!(5,Rng),
+            &interpolateLine!(6,Rng),
+            &interpolateLine!(7,Rng),
+            &interpolateLine!(8,Rng),];
+        if(lineSize <= 8)
+        {
+            f[lineSize](rng, col1, col2);
+        }
+        else
+        {
+            interpolateLineImpl(lineSize, rng, col1, col2);
+        }
+    }
+
+    private @nogc static void interpolateLineImpl(Rng)(int lineSize, Rng rng, in Color col1, in Color col2) pure nothrow 
         if(isRandomAccessRange!Rng)
     {
         /*foreach(i;0..lineSize)
