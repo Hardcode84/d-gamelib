@@ -2,11 +2,9 @@
 
 import gamelib.types;
 
-final class MemSurface(ElemT, int TileW = 1, int TileH = 1)
+final class MemSurface(ElemT)
 {
 private:
-    static assert(TileW > 0);
-    static assert(TileH > 0);
     immutable int    mWidth;
     immutable int    mHeight;
     immutable size_t mPitch;
@@ -33,7 +31,7 @@ public:
     final auto opIndex(int y) pure nothrow
     {
         import gamelib.graphics.surfaceview;
-        SurfaceView!(ElemT,TileW,TileH) view = this;
+        SurfaceView!(ElemT) view = this;
         return view[y];
     }
     

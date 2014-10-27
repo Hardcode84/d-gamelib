@@ -2,14 +2,13 @@
 
 import std.traits;
 import gamelib.types;
+import gamelib.math;
 
 @nogc:
-struct SurfaceView(ElemT,int TileW = 1,int TileH = 1)
+struct SurfaceView(ElemT,bool Wrap = false)
 {
 @nogc:
 private:
-    static assert(TileW > 0);
-    static assert(TileH > 0);
     immutable int    mWidth;
     immutable int    mHeight;
     immutable size_t mPitch;
@@ -30,6 +29,12 @@ public:
         struct Line
         {
         private:
+            static if(Wrap)
+            {
+                uint wmask;
+                uint hmask;
+                int curry;
+            }
             debug
             {
                 int width;
@@ -49,40 +54,62 @@ public:
                     assert(y < height, debugConv(y));
                 }
             }
+            void correctX(ref int x) const pure nothrow
+            {
+                static if(Wrap)
+                {
+                    x &= wmask;
+                }
+            }
+            void correctY(ref int y) const pure nothrow
+            {
+                static if(Wrap)
+                {
+                    y &= hmask;
+                }
+            }
         public:
-            
+
             auto opIndex(int x) const pure nothrow
             {
+                correctX(x);
                 checkCoord(x);
                 return data[x];
             }
 
-            static if(M) auto opIndexAssign(T)(in T value, int x) pure nothrow if(isAssignable!(ElemT,T))
+            auto opIndexAssign(T)(in T value, int x) pure nothrow if(M && isAssignable!(ElemT,T))
             {
+                correctX(x);
                 checkCoord(x);
                 return data[x] = value;
             }
 
             auto opSlice(int x1, int x2) pure nothrow
             {
-                checkCoord(x1);
                 assert(x2 >= x1);
+                correctX(x1);
+                correctX(x2);
+                checkCoord(x1);
                 debug assert(x2 <= width);
                 return data[x1..x2];
             }
 
             auto opSlice(int x1, int x2) const pure nothrow
             {
-                checkCoord(x1);
                 assert(x2 >= x1);
+                correctX(x1);
+                correctX(x2);
+                checkCoord(x1);
                 debug assert(x2 <= width);
                 return data[x1..x2];
             }
 
-            static if(M) auto opSliceAssign(T)(in T val, int x1, int x2) pure nothrow if(isAssignable!(ElemT,T))
+            auto opSliceAssign(T)(in T val, int x1, int x2) pure nothrow if(M && isAssignable!(ElemT,T))
             {
-                checkCoord(x1);
                 assert(x2 >= x1);
+                correctX(x1);
+                correctX(x2);
+                checkCoord(x1);
                 debug assert(x2 <= width);
                 return data[x1..x2] = val;
             }
@@ -93,18 +120,38 @@ public:
                 debug
                 {
                     mixin("y"~op~";");
+                    correctY(y);
+                }
+                static if(Wrap)
+                {
+                    mixin("curry"~op~";");
+                    const oldy = curry;
+                    correctY(curry);
+                    const dy = curry - oldy;
+                    data = cast(ElemT*)(cast(byte*)data + pitch * dy);
                 }
                 return this;
             }
         }
-
+        static if(Wrap)
+        {
+            assert(ispow2(mWidth),  debugConv(mWidth));
+            assert(ispow2(mHeight), debugConv(mWidth));
+            y &= (mHeight - 1);
+        }
         assert(mData);
         Line ret = {pitch: mPitch, data: cast(ElemT*)(mData + mPitch * y) };
         debug
         {
-            ret.width = mWidth;
+            ret.width  = mWidth;
             ret.height = mHeight;
             ret.y = y;
+        }
+        static if(Wrap)
+        {
+            ret.curry = y;
+            ret.wmask = mWidth  - 1;
+            ret.hmask = mHeight - 1;
         }
         return ret;
     }

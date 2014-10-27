@@ -198,7 +198,6 @@ struct Color(bool bgra = false)
         {
             rng[i] = lerp(col2,col1, cast(float)i / cast(float)LineSize);
         }*/
-        import gamelib.math;
         static if(8 == LineSize) //hack
         {
             rng[0] = col1;
