@@ -117,11 +117,11 @@ public:
     
     ref FixedPoint opAssign(U)(in U x) pure nothrow if (isFloatingPoint!U)
     {
-        static if(is(value_t : int) && is(U : float))
+        /*static if(is(value_t : int) && is(U : float))
         {
-            value = hackTrunc!N(x);
+            value = shorten(hackTrunc!N(x));
         }
-        else
+        else*/
         {
             value = shorten(cast(inter_t)(x * ONE)); // truncation
         }
@@ -227,6 +227,22 @@ public:
                 assert(value >= (1 << (M - 2)));
             }
             value = shorten((cast(inter_t)value << N) / cast(inter_t)x.value);
+        }
+        else static if(op == "&")
+        {
+            static assert(U.sizeof == this.sizeof);
+            static if(isIntegral!U)
+            {
+                value &= x;
+            }
+            else static if(isFixedPoint!U)
+            {
+                value &= x.value;
+            }
+            else
+            {
+                static assert(false);
+            }
         }
         else
         {
