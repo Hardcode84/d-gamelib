@@ -51,7 +51,7 @@ private string convImpl(T)(in T val) pure nothrow @trusted
 @nogc:
 void debugOut(T)(in T val) pure nothrow @trusted
 {
-    debug
+    debug /*static if(!__ctfe)*/
     {
         static if(HasNogc)
         {

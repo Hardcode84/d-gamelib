@@ -24,6 +24,14 @@ public:
         mData   = cast(typeof(mData))surf.data;
     }
 
+    this(int width, int height, int pitch, typeof(mData) data)
+    {
+        mWidth  = width;
+        mHeight = height;
+        mPitch  = pitch;
+        mData   = data;
+    }
+
     auto opIndex(int y) inout pure nothrow
     {
         struct Line
@@ -33,7 +41,7 @@ public:
             {
                 uint wmask;
                 uint hmask;
-                int curry;
+                int  curr_y;
             }
             debug
             {
@@ -124,10 +132,10 @@ public:
                 }
                 static if(Wrap)
                 {
-                    mixin("curry"~op~";");
-                    const oldy = curry;
-                    correctY(curry);
-                    const dy = curry - oldy;
+                    mixin("curr_y"~op~";");
+                    const oldy = curr_y;
+                    correctY(curr_y);
+                    const dy = curr_y - oldy;
                     data = cast(ElemT*)(cast(byte*)data + pitch * dy);
                 }
                 return this;
@@ -149,7 +157,7 @@ public:
         }
         static if(Wrap)
         {
-            ret.curry = y;
+            ret.curr_y = y;
             ret.wmask = mWidth  - 1;
             ret.hmask = mHeight - 1;
         }
