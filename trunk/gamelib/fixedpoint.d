@@ -102,17 +102,20 @@ public:
             value = x.value;
             return this;
         }
-        Largest!(inter_t, U.inter_t) temp = x.value;
-        static if(shift < 0)
+        else
         {
-            temp >>= -shift;
+            Largest!(inter_t, U.inter_t) temp = x.value;
+            static if(shift < 0)
+            {
+                temp >>= -shift;
+            }
+            else static if(shift > 0)
+            {
+                temp <<= shift;
+            }
+            value = shorten(temp);
+            return this;
         }
-        else static if(shift > 0)
-        {
-            temp <<= shift;
-        }
-        value = shorten(temp);
-        return this;
     }
     
     ref FixedPoint opAssign(U)(in U x) pure nothrow if (isFloatingPoint!U)

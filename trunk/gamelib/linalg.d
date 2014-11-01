@@ -539,7 +539,7 @@ struct Vector(type, int dimension_) {
 
     unittest {
         vec2 v2 = vec2(1.0f, 3.0f);
-        2 * v2;
+        cast(void)(2 * v2);
         assert((v2*2.5f).vector == [2.5f, 7.5f]);
         assert((v2+vec2(3.0f, 1.0f)).vector == [4.0f, 4.0f]);
         assert((v2-vec2(1.0f, 3.0f)).vector == [0.0f, 0.0f]);

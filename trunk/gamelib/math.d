@@ -24,7 +24,7 @@ public {
     import gamelib.fixedpoint;
     import std.math : PI, sin, cos, tan, asin, acos, atan, atan2,
                       sinh, cosh, tanh, asinh, acosh, atanh,
-                      pow, exp, log, exp2, log2,
+                      pow, exp, log, exp2,
                       floor, trunc, round, ceil, modf,
                       hypot, isNaN, isInfinity;
     alias round roundEven;
@@ -60,6 +60,22 @@ T mod(T)(T x, T y) { // std.math.floor is not pure
 
 @safe pure nothrow:
 
+int log2(T)(in T val) if(isIntegral!T)
+in
+{
+    assert(val > 0);
+}
+body
+{
+    import core.bitop;
+    return bsr(val);
+}
+
+auto log2(T)(in T val) if(isFloatingPoint!T)
+{
+    return smath.log2;
+}
+
 extern (C) { float fmodf(float x, float y); }
 
 /// Calculates the absolute value.
@@ -91,6 +107,12 @@ T abs(T)(T quat) if(is_quaternion!T) {
 }
 
 unittest {
+    assert(log2(4) == 2);
+    assert(log2(5) == 2);
+    assert(log2(6) == 2);
+    assert(log2(7) == 2);
+    assert(log2(8) == 3);
+
     assert(abs(0) == 0);
     assert(abs(-1) == 1);
     assert(abs(1) == 1);
