@@ -5,7 +5,6 @@ import gamelib.types;
 
 import derelict.sdl2.sdl;
 
-@nogc:
 class Surface
 {
 package:
@@ -170,4 +169,23 @@ public:
         u.c = col;
         mixin SDL_CHECK!(`SDL_FillRect(mSurface, null, u.i)`);
     }
+}
+
+auto loadFromFile(ColT)(in string filename)
+{
+    import std.string;
+    SDL_Surface* surface = null;
+    version(UseSDLImage)
+    {
+        mixin SDL_CHECK_NULL!(`surface = IMG_Load(toStringz(filename))`,"IMG_GetError()");
+    }
+    else
+    {
+        mixin SDL_CHECK_NULL!(`surface = SDL_LoadBMP(toStringz(filename))`);
+    }
+    scope(exit) SDL_FreeSurface(surface);
+    auto surf = new FFSurface!ColT(surface.w,surface.h);
+    scope(failure) surf.dispose();
+    mixin SDL_CHECK!(`SDL_BlitSurface(surface,null,surf.mSurface,null)`);
+    return surf;
 }
