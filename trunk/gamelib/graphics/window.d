@@ -21,6 +21,7 @@ final class Window
 {
 package:
     SDL_Window* mWindow = null;
+    Uint32      mWinId = 0;
     Surface mCachedSurf = null;
     version(Windows)
     {
@@ -42,6 +43,7 @@ public:
         {
             mHDC = enforce(GetDC(info.info.win.window), "Unable to get HDC");
         }
+        mWinId = SDL_GetWindowID(mWindow);
     }
 
     ~this() const pure nothrow
@@ -61,9 +63,24 @@ public:
         SDL_SetWindowTitle(mWindow, toStringz(t));
     }
 
+    void setSize(int x, int y) nothrow
+    {
+        assert(mWindow);
+        invalidateSurface();
+        SDL_SetWindowSize(mWindow, x, y);
+    }
+
+    void invalidateSurface() nothrow
+    {
+        if(mCachedSurf)
+        {
+            mCachedSurf.dispose();
+            mCachedSurf = null;
+        }
+    }
+
     void dispose() nothrow
     {
-
         if(mWindow)
         {
             version(Windows)
@@ -73,13 +90,9 @@ public:
                     ReleaseDC(mWindow,mHDC);
                 }
             }
+            invalidateSurface();
             SDL_DestroyWindow(mWindow);
             mWindow = null;
-            if(mCachedSurf)
-            {
-                mCachedSurf.dispose();
-                mCachedSurf = null;
-            }
         }
     }
 
@@ -213,5 +226,18 @@ public:
     {
         assert(mWindow);
         return text(SDL_GetPixelFormatName(SDL_GetWindowPixelFormat(mWindow))).idup;
+    }
+
+    @property bool hidden() nothrow
+    {
+        assert(mWindow !is null);
+        return 0 != (SDL_WINDOW_MINIMIZED & SDL_GetWindowFlags(mWindow)) ||
+               0 != (SDL_WINDOW_HIDDEN    & SDL_GetWindowFlags(mWindow));
+    }
+
+    @property auto winId() const pure nothrow
+    {
+        assert(mWindow !is null);
+        return mWinId;
     }
 }

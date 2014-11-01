@@ -58,7 +58,7 @@ void debugOut(T)(in T val) pure nothrow @trusted
             //dirty hack to shut up compiler
             mixin(`
             alias fn_t = string function(in T) pure nothrow @nogc;
-            (cast(fn_t)&outImpl!T)(val); //hack to add @nogc`);
+            cast(void)(cast(fn_t)&outImpl!T)(val); //hack to add @nogc`);
         }
         else
         {
