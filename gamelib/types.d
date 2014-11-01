@@ -43,15 +43,15 @@ private string convImpl(T)(in T val) pure nothrow @trusted
             import std.conv;
             return text(val);
         }
-        catch(Exception e) {}
+        catch(Exception e) { return ""; }
     }
-    return "";
+    else return "";
 }
 
 @nogc:
 void debugOut(T)(in T val) pure nothrow @trusted
 {
-    debug /*static if(!__ctfe)*/
+    debug
     {
         static if(HasNogc)
         {
@@ -83,7 +83,7 @@ auto debugConv(T)(in T val) pure nothrow @trusted
             convImpl(val);
         }
     }
-    return "";
+    else return "";
 }
 @nogc:
 
