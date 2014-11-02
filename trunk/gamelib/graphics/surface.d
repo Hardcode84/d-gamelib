@@ -171,7 +171,7 @@ public:
     }
 }
 
-auto loadFromFile(ColT)(in string filename)
+auto loadSurfaceFromFile(ColT)(in string filename)
 {
     import std.string;
     SDL_Surface* surface = null;
