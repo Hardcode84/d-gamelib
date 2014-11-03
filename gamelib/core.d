@@ -9,6 +9,7 @@ import gamelib.types;
 
 class Core
 {
+public:
     this(bool video = true, bool sound = true)
     {
         scope(failure) dispose();
@@ -19,6 +20,9 @@ class Core
         if(sound) sdlFlags |= SDL_INIT_AUDIO;
 
         mixin SDL_CHECK!(`SDL_Init(sdlFlags)`);
+        //SDL_LogSetAllPriority(SDL_LOG_PRIORITY_CRITICAL);
+        SDL_LogSetOutputFunction(&logFunc, null);
+        SDL_LogCritical(SDL_LOG_CATEGORY_ERROR, "testlog");
         version(UseSDLImage)
         {
             DerelictSDL2Image.load();
@@ -43,5 +47,33 @@ class Core
             SDL_Quit();
             DerelictSDL2.unload();
         }
+    }
+private:
+    static extern( C ) nothrow void logFunc(void* userData, int category, SDL_LogPriority priority, const( char )* message)
+    {
+        static immutable string[] categories = [
+        "application",
+        "error",
+        "system",
+        "audio",
+        "video",
+        "render",
+        "input"];
+        static immutable string[] priorities = [
+        "none",
+        "verbose",
+        "debug",
+        "info",
+        "warn",
+        "error",
+        "critical"];
+        const string cat = (category >= 0 && category < categories.length ? categories[category] : "unknown");
+        const string pri = (priority >= 0 && priority < priorities.length ? priorities[priority] : "unknown");
+        import std.stdio;
+        try
+        {
+            writefln("SDL log: %s %s: %s", cat, pri, text(message));
+        }
+        catch(Exception e) {}
     }
 }
