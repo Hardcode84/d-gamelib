@@ -20,9 +20,7 @@ public:
         if(sound) sdlFlags |= SDL_INIT_AUDIO;
 
         mixin SDL_CHECK!(`SDL_Init(sdlFlags)`);
-        //SDL_LogSetAllPriority(SDL_LOG_PRIORITY_CRITICAL);
         SDL_LogSetOutputFunction(&logFunc, null);
-        SDL_LogCritical(SDL_LOG_CATEGORY_ERROR, "testlog");
         version(UseSDLImage)
         {
             DerelictSDL2Image.load();
