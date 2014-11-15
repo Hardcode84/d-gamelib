@@ -200,6 +200,13 @@ public:
         return this;
     }
     
+    /*ref FixedPoint opOpAssign(string op : "&", U)(U x) pure nothrow if(isIntegral!U)
+    {
+        static assert(U.sizeof == this.sizeof);
+        value &= x;
+        return this;
+    }*/
+    
     ref FixedPoint opOpAssign(string op, U)(in U x) pure nothrow if(is(U : this_t))
     {
         static if (op == "+")
@@ -233,19 +240,7 @@ public:
         }
         else static if(op == "&")
         {
-            static assert(U.sizeof == this.sizeof);
-            static if(isIntegral!U)
-            {
-                value &= x;
-            }
-            else static if(isFixedPoint!U)
-            {
-                value &= x.value;
-            }
-            else
-            {
-                static assert(false);
-            }
+            value &= x.value;
         }
         else
         {

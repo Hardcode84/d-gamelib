@@ -42,6 +42,7 @@ private {
     import smath = std.math;
     
     import gamelib.util : is_vector, is_quaternion, is_matrix;
+    import gamelib.types;
 
     version(unittest) {
         import gamelib.linalg : vec2, vec2i, vec3, vec3i, quat;
@@ -63,7 +64,7 @@ T mod(T)(T x, T y) { // std.math.floor is not pure
 int log2(T)(in T val) if(isIntegral!T)
 in
 {
-    assert(val > 0);
+    assert(val > 0, debugConv(val));
 }
 body
 {
