@@ -1451,15 +1451,15 @@ struct Matrix(type, int rows_, int cols_) if((rows_ > 0) && (cols_ > 0)) {
     static if((rows == cols) && (rows >= 3)) {
         static if(isFloatingPoint!mt) {
             /// Returns an identity matrix with an applied rotate_axis around an arbitrary axis (nxn matrices, n >= 3).
-            static Matrix rotation(real alpha, Vector!(mt, 3) axis) {
+            static Matrix rotation(mt alpha, Vector!(mt, 3) axis) {
                 Matrix mult = Matrix.identity;
 
                 if(axis.length != 1) {
                     axis.normalize();
                 }
 
-                real cosa = cos(alpha);
-                real sina = sin(alpha);
+                const cosa = cos(alpha);
+                const sina = sin(alpha);
 
                 Vector!(mt, 3) temp = (1 - cosa)*axis;
 
@@ -1477,12 +1477,12 @@ struct Matrix(type, int rows_, int cols_) if((rows_ > 0) && (cols_ > 0)) {
             }
 
             /// ditto
-            static Matrix rotation(real alpha, mt x, mt y, mt z) {
+            static Matrix rotation(mt alpha, mt x, mt y, mt z) {
                 return Matrix.rotation(alpha, Vector!(mt, 3)(x, y, z));
             }
 
             /// Returns an identity matrix with an applied rotation around the x-axis (nxn matrices, n >= 3).
-            static Matrix xrotation(real alpha) {
+            static Matrix xrotation(mt alpha) {
                 Matrix mult = Matrix.identity;
 
                 mt cosamt = to!mt(cos(alpha));
@@ -1497,7 +1497,7 @@ struct Matrix(type, int rows_, int cols_) if((rows_ > 0) && (cols_ > 0)) {
             }
 
             /// Returns an identity matrix with an applied rotation around the y-axis (nxn matrices, n >= 3).
-            static Matrix yrotation(real alpha) {
+            static Matrix yrotation(mt alpha) {
                 Matrix mult = Matrix.identity;
 
                 mt cosamt = to!mt(cos(alpha));
@@ -1512,7 +1512,7 @@ struct Matrix(type, int rows_, int cols_) if((rows_ > 0) && (cols_ > 0)) {
             }
 
             /// Returns an identity matrix with an applied rotation around the z-axis (nxn matrices, n >= 3).
-            static Matrix zrotation(real alpha) {
+            static Matrix zrotation(mt alpha) {
                 Matrix mult = Matrix.identity;
 
                 mt cosamt = to!mt(cos(alpha));
@@ -1526,25 +1526,25 @@ struct Matrix(type, int rows_, int cols_) if((rows_ > 0) && (cols_ > 0)) {
                 return mult;
             }
 
-            Matrix rotate(real alpha, Vector!(mt, 3) axis) {
+            Matrix rotate(mt alpha, Vector!(mt, 3) axis) {
                 this = rotation(alpha, axis) * this;
                 return this;
             }
 
             /// Rotates the current matrix around the x-axis and returns $(I this) (nxn matrices, n >= 3).
-            Matrix rotatex(real alpha) {
+            Matrix rotatex(mt alpha) {
                 this = xrotation(alpha) * this;
                 return this;
             }
 
             /// Rotates the current matrix around the y-axis and returns $(I this) (nxn matrices, n >= 3).
-            Matrix rotatey(real alpha) {
+            Matrix rotatey(mt alpha) {
                 this = yrotation(alpha) * this;
                 return this;
             }
 
             /// Rotates the current matrix around the z-axis and returns $(I this) (nxn matrices, n >= 3).
-            Matrix rotatez(real alpha) {
+            Matrix rotatez(mt alpha) {
                 this = zrotation(alpha) * this;
                 return this;
             }
@@ -2031,12 +2031,12 @@ struct Quaternion(type) {
     }
     
     /// Returns the squared magnitude of the quaternion.
-    @property real magnitude_squared() const {
-        return to!real(w^^2 + x^^2 + y^^2 + z^^2);
+    @property auto magnitude_squared() const {
+        return (w^^2 + x^^2 + y^^2 + z^^2);
     }
     
     /// Returns the magnitude of the quaternion.
-    @property real magnitude() const {
+    @property auto magnitude() const {
         return sqrt(magnitude_squared);
     }
     
@@ -2101,28 +2101,28 @@ struct Quaternion(type) {
         qt trace = mat[0][0] + mat[1][1] + mat[2][2];
         
         if(trace > 0) {
-            real s = 0.5 / sqrt(trace + 1.0);
+            const s = 0.5 / sqrt(trace + 1.0);
             
             ret.w = to!qt(0.25 / s);
             ret.x = to!qt((mat[2][1] - mat[1][2]) * s);
             ret.y = to!qt((mat[0][2] - mat[2][0]) * s);
             ret.z = to!qt((mat[1][0] - mat[0][1]) * s);
         } else if((mat[0][0] > mat[1][2]) && (mat[0][0] > mat[2][2])) {
-            real s = 2.0 * sqrt(1 + mat[0][0] - mat[1][1] - mat[2][2]);
+            const s = 2.0 * sqrt(1 + mat[0][0] - mat[1][1] - mat[2][2]);
             
             ret.w = to!qt((mat[2][1] - mat[1][2]) / s);
             ret.x = to!qt(0.25 * s);
             ret.y = to!qt((mat[0][1] - mat[1][0]) / s);
             ret.z = to!qt((mat[0][2] - mat[2][0]) / s);
         } else if(mat[1][1] > mat[2][2]) {
-            real s = 2.0 * sqrt(1 + mat[1][1] - mat[0][0] - mat[2][2]);
+            const s = 2.0 * sqrt(1 + mat[1][1] - mat[0][0] - mat[2][2]);
             
             ret.w = to!qt((mat[0][2] - mat[2][0]) / s);
             ret.x = to!qt((mat[0][1] + mat[1][0]) / s);
             ret.y = to!qt(0.25f * s);
             ret.z = to!qt((mat[1][2] + mat[2][1]) / s);
         } else {
-            real s = 2.0 * sqrt(1 + mat[2][2] - mat[0][0] - mat[1][1]);
+            const s = 2.0 * sqrt(1 + mat[2][2] - mat[0][0] - mat[1][1]);
 
             ret.w = to!qt((mat[1][0] - mat[0][1]) / s);
             ret.x = to!qt((mat[0][2] + mat[2][0]) / s);
@@ -2221,18 +2221,18 @@ struct Quaternion(type) {
     }
     
     /// Returns the yaw.
-    @property real yaw() const {
-        return atan2(to!real(2 * (w*y + x*z)), to!real(w^^2 - x^^2 - y^^2 + z^^2));
+    @property auto yaw() const {
+        return atan2((2 * (w*y + x*z)), (w^^2 - x^^2 - y^^2 + z^^2));
     }
     
     /// Returns the pitch.
-    @property real pitch() const {
-        return asin(to!real(2 * (w*x - y*z)));
+    @property auto pitch() const {
+        return asin((2 * (w*x - y*z)));
     }
     
     /// Returns the roll.
-    @property real roll() const {
-        return atan2(to!real(2 * (w*z + x*y)), to!real(w^^2 - x^^2 + y^^2 - z^^2));
+    @property auto roll() const {
+        return atan2((2 * (w*z + x*y)), (w^^2 - x^^2 + y^^2 - z^^2));
     }
 
     unittest {
@@ -2253,7 +2253,7 @@ struct Quaternion(type) {
     }
     
     /// Returns a quaternion with applied rotation around the x-axis.
-    static Quaternion xrotation(real alpha) {
+    static Quaternion xrotation(qt alpha) {
         Quaternion ret;
         
         alpha /= 2;
@@ -2266,7 +2266,7 @@ struct Quaternion(type) {
     }
     
     /// Returns a quaternion with applied rotation around the y-axis.
-    static Quaternion yrotation(real alpha) {
+    static Quaternion yrotation(qt alpha) {
         Quaternion ret;
         
         alpha /= 2;
@@ -2279,7 +2279,7 @@ struct Quaternion(type) {
     }
     
     /// Returns a quaternion with applied rotation around the z-axis.
-    static Quaternion zrotation(real alpha) {
+    static Quaternion zrotation(qt alpha) {
         Quaternion ret;
         
         alpha /= 2;
@@ -2292,7 +2292,7 @@ struct Quaternion(type) {
     }
     
     /// Returns a quaternion with applied rotation around an axis.
-    static Quaternion axis_rotation(real alpha, Vector!(qt, 3) axis) {
+    static Quaternion axis_rotation(qt alpha, Vector!(qt, 3) axis) {
         if(alpha == 0) {
             return Quaternion.identity;
         }
@@ -2310,15 +2310,15 @@ struct Quaternion(type) {
     }
     
     /// Creates a quaternion from an euler rotation.
-    static Quaternion euler_rotation(real heading, real attitude, real bank) {
+    static Quaternion euler_rotation(qt heading, qt attitude, qt bank) {
         Quaternion ret;
         
-        real c1 = cos(heading / 2);
-        real s1 = sin(heading / 2);
-        real c2 = cos(attitude / 2);
-        real s2 = sin(attitude / 2);
-        real c3 = cos(bank / 2);
-        real s3 = sin(bank / 2);
+        const c1 = cos(heading / 2);
+        const s1 = sin(heading / 2);
+        const c2 = cos(attitude / 2);
+        const s2 = sin(attitude / 2);
+        const c3 = cos(bank / 2);
+        const s3 = sin(bank / 2);
         
         ret.w = to!qt(c1 * c2 * c3 - s1 * s2 * s3);
         ret.x = to!qt(s1 * s2 * c3 + c1 * c2 * s3);
@@ -2329,31 +2329,31 @@ struct Quaternion(type) {
     }
     
     /// Rotates the current quaternion around the x-axis and returns $(I this).
-    Quaternion rotatex(real alpha) {
+    Quaternion rotatex(qt alpha) {
         this = xrotation(alpha) * this;
         return this;
     }
     
     /// Rotates the current quaternion around the y-axis and returns $(I this).
-    Quaternion rotatey(real alpha) {
+    Quaternion rotatey(qt alpha) {
         this = yrotation(alpha) * this;
         return this;
     }
     
     /// Rotates the current quaternion around the z-axis and returns $(I this).
-    Quaternion rotatez(real alpha) {
+    Quaternion rotatez(qt alpha) {
         this = zrotation(alpha) * this;
         return this;
     }
     
     /// Rotates the current quaternion around an axis and returns $(I this).
-    Quaternion rotate_axis(real alpha, Vector!(qt, 3) axis) {
+    Quaternion rotate_axis(qt alpha, Vector!(qt, 3) axis) {
         this = axis_rotation(alpha, axis) * this;
         return this;
     }
     
     /// Applies an euler rotation to the current quaternion and returns $(I this).
-    Quaternion rotate_euler(real heading, real attitude, real bank) {
+    Quaternion rotate_euler(qt heading, qt attitude, qt bank) {
         this = euler_rotation(heading, attitude, bank) * this;
         return this;
     }
@@ -2374,9 +2374,9 @@ struct Quaternion(type) {
                quat.identity.rotate_axis(PI, vec3(1.0f, 1.0f, 1.0f)).quaternion);
         
         quat q1 = quat.euler_rotation(PI, PI, PI);
-        assert((q1.x > -1e-16) && (q1.x < 1e-16));
-        assert((q1.y > -1e-16) && (q1.y < 1e-16));
-        assert((q1.z > -1e-16) && (q1.z < 1e-16));
+        assert((q1.x > -1e-7) && (q1.x < 1e-7));
+        assert((q1.y > -1e-7) && (q1.y < 1e-7));
+        assert((q1.z > -1e-7) && (q1.z < 1e-7));
         assert(q1.w == -1.0f);
         assert(quat.euler_rotation(PI, PI, PI).quaternion == quat.identity.rotate_euler(PI, PI, PI).quaternion);
     }
