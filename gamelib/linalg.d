@@ -15,6 +15,7 @@ License: MIT
 
 Note: All methods marked with pure are weakly pure since, they all access an instance member.
 All static methods are strongly pure.
+
 End of original comment.
 
 I moved this file to my lib and make some changes to accomodate my fixed point class.
