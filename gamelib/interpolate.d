@@ -15,7 +15,7 @@ private {
     import std.conv : to;
 }
 
-@safe pure nothrow @nogc:
+@safe pure nothrow:
 
 /// Interpolates linear between two points, also known as lerp.
 auto interp(T1,T2)(in T1 a, in T1 b, in T2 t) {
