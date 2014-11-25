@@ -118,7 +118,7 @@ public:
                 correctX(x1);
                 correctX(x2);
                 checkCoord(x1);
-                debug assert(x2 <= width);
+                debug assert(x2 <= width, debugConv(x2));
                 return data[x1..x2] = val;
             }
 
