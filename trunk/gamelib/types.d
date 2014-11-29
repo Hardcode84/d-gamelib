@@ -80,7 +80,7 @@ auto debugConv(T)(in T val) pure nothrow @trusted
         }
         else
         {
-            convImpl(val);
+            return convImpl(val);
         }
     }
     else return "";
