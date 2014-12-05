@@ -684,7 +684,89 @@ struct Vector(type, int dimension_) {
         if(vec4(1.0f)) { }
         else { assert(false); }
     }
-        
+
+    // index and slicing operators
+    auto opIndex(int i) const
+    in
+    {
+        assert(i >= 0);
+        assert(i < dimension);
+    }
+    body
+    {
+        return vector[i];
+    }
+
+    auto opIndexAssign(in vt value, int i)
+    in
+    {
+        assert(i >= 0);
+        assert(i < dimension);
+    }
+    body
+    {
+        return vector[i] = value;
+    }
+
+    auto opSlice(int i1, int i2) inout
+    in
+    {
+        assert(i2 >= i1);
+        assert(i1 >= 0);
+        assert(i1 <= dimension);
+        assert(i2 >= 0);
+        assert(i2 <= dimension);
+    }
+    body
+    {
+        return vector[i1..i2];
+    }
+
+    auto opSliceAssign(in vt val, int i1, int i2)
+    in
+    {
+        assert(i2 >= i1);
+        assert(i1 >= 0);
+        assert(i1 <= dimension);
+        assert(i2 >= 0);
+        assert(i2 <= dimension);
+    }
+    body
+    {
+        return vector[i1..i2] = val;
+    }
+
+    auto opIndex() inout
+    {
+        return vector[];
+    }
+
+    unittest
+    {
+        auto v1 = vec2i(0, 1);
+        assert(v1[0] == 0);
+        assert(v1[1] == 1);
+        v1[0..2] = 5;
+        assert(v1[0] == 5);
+        assert(v1[1] == 5);
+        v1[1] = 3;
+        v1[0] = 2;
+        assert(v1[0] == 2);
+        assert(v1[1] == 3);
+        assert(v1[0..2] == [2,3]);
+        const v2 = vec2i(2, 3);
+        assert(v2[0..2] == [2,3]);
+        assert(v2[0..2] == v1[0..2]);
+
+        (v1[])[0] = 4;
+        (v1[])[1] = 5;
+        assert(v1[0] == 4);
+        assert(v1[1] == 5);
+        assert((v1[])[0] == 4);
+        assert((v1[])[1] == 5);
+        assert((v2[])[0] == 2);
+        assert((v2[])[1] == 3);
+    }
 }
 
 /// Calculates the product between two vectors.
