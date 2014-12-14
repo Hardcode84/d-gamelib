@@ -92,7 +92,6 @@ private auto visitImpl(bool Strict, VariantType, HandlerT...)(VariantType varian
     }
 
     enum HandlerOverloadMap = visitGetOverloadMap();
-    pragma(msg, HandlerOverloadMap);
 
     if (!variant.hasValue)
     {
@@ -126,7 +125,6 @@ private auto visitImpl(bool Strict, VariantType, HandlerT...)(VariantType varian
             }
             else
             {
-                writeln("call");
                 return handler[ dgIdx ](*ptr);
             }
         }
