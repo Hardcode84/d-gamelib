@@ -21,14 +21,27 @@ else
     enum HasNogc = true;
 }
 
-private void outImpl(T)(in T val) pure nothrow @trusted
+private void outImpl(T...)(in T args) pure nothrow @trusted
 {
     debug
     {
         try
         {
             import std.stdio;
-            writeln(val);
+            writeln(args);
+        }
+        catch(Exception e) {}
+    }
+}
+
+private void foutImpl(T...)(in T args) pure nothrow @trusted
+{
+    debug
+    {
+        try
+        {
+            import std.stdio;
+            writefln(args);
         }
         catch(Exception e) {}
     }
@@ -49,7 +62,7 @@ private string convImpl(T)(in T val) pure nothrow @trusted
 }
 
 @nogc:
-void debugOut(T)(in T val) pure nothrow @trusted
+void debugOut(T...)(in T args) pure nothrow @trusted
 {
     debug
     {
@@ -58,11 +71,29 @@ void debugOut(T)(in T val) pure nothrow @trusted
             //dirty hack to shut up compiler
             mixin(`
             alias fn_t = string function(in T) pure nothrow @nogc;
-            cast(void)(cast(fn_t)&outImpl!T)(val); //hack to add @nogc`);
+            cast(void)(cast(fn_t)&outImpl!T)(args); //hack to add @nogc`);
         }
         else
         {
-            outImpl(val);
+            outImpl(args);
+        }
+    }
+}
+
+void debugfOut(T...)(in T args) pure nothrow @trusted
+{
+    debug
+    {
+        static if(HasNogc)
+        {
+            //dirty hack to shut up compiler
+            mixin(`
+            alias fn_t = string function(in T) pure nothrow @nogc;
+            cast(void)(cast(fn_t)&foutImpl!T)(args); //hack to add @nogc`);
+        }
+        else
+        {
+            foutImpl(args);
         }
     }
 }
@@ -85,7 +116,21 @@ auto debugConv(T)(in T val) pure nothrow @trusted
     }
     else return "";
 }
-@nogc:
+
+debug unittest
+{
+    assert("10" == debugConv("10"));
+    assert("10" == debugConv(10));
+    assert("1.1" == debugConv(1.1f));
+
+    debugOut("test debug out");
+    debugOut(1);
+    debugOut(1.1f);
+    debugOut(1,2,3);
+    debugOut(1.0,2.0,3.0);
+    debugOut("1","2","3");
+    debugfOut("test formatted debug out %s, %s, %s", 1, 2.0, "3");
+}
 
 struct Size
 {
