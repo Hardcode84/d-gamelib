@@ -308,11 +308,16 @@ struct Color(bool bgra = false)
     }
 }
 
-enum Color!true ColorWhite = {r:255,g:255,b:255};
-enum Color!true ColorBlack = {r:0  ,g:0  ,b:0  };
-enum Color!true ColorGreen = {r:0  ,g:255,b:0  };
-enum Color!true ColorRed   = {r:255,g:0  ,b:0  };
-enum Color!true ColorBlue  = {r:0  ,g:0  ,b:255};
+enum Color!true ColorWhite   = {r:255,g:255,b:255};
+enum Color!true ColorSilver  = {r:0xc0,g:0xc0,b:0xc0};
+enum Color!true ColorGray    = {r:0x80,g:0x80,b:0x80};
+enum Color!true ColorBlack   = {r:0  ,g:0  ,b:0  };
+enum Color!true ColorYellow  = {r:0xff,g:0xff,b:0x00};
+enum Color!true ColorCyan    = {r:0x00,g:0xff,b:0xff};
+enum Color!true ColorMagenta = {r:0xff,g:0x00,b:0xff};
+enum Color!true ColorGreen   = {r:0  ,g:255,b:0  };
+enum Color!true ColorRed     = {r:255,g:0  ,b:0  };
+enum Color!true ColorBlue    = {r:0  ,g:0  ,b:255};
 enum Color!true ColorTransparentWhite = {r:255,g:255,b:255, a: 0};
 
 template Tuple(E...)
