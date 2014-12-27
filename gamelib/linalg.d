@@ -2675,6 +2675,10 @@ unittest
     vects ~= vec2(2*vec3(1,0,0),3*vec3(0,1,0));
     vects ~= vec2(vec3(1,0,0),vec3(-1,0,0));
     vects ~= vec2(2*vec3(1,0,0),3*vec3(-1,0,0));
+    vects ~= vec2(vec3(0,1,0),vec3(0,-1,0));
+    vects ~= vec2(2*vec3(0,1,0),3*vec3(0,-1,0));
+    vects ~= vec2(vec3(0,0,1),vec3(0,0,-1));
+    vects ~= vec2(2*vec3(0,0,1),3*vec3(0,0,-1));
     import std.random;
     Random rand;
     rand.seed();
