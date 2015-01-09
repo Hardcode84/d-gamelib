@@ -1,5 +1,6 @@
 ﻿module gamelib.graphics.color;
 
+import std.traits;
 import std.algorithm;
 import std.range;
 import std.typetuple;
@@ -118,13 +119,27 @@ pure nothrow:
         return fromRaw(toRaw() + rhs.toRaw());
     }
 
-    auto opBinary(string op : "*",T)(in T rhs) const
+    auto opBinary(string op : "*",T)(in T rhs) const if(isFloatingPoint!T || isIntegral!T)
     {
         Color ret;
         foreach(c;TypeTuple!('r','g','b'))
         {
             enum str = format("ret.%1$s = cast(ubyte)(%1$s*rhs);",c);
             mixin(str);
+        }
+        return ret;
+    }
+
+    auto opBinary(string op : "*",T)(in T rhs) const if(isColor!T || isTemplateColor!T)
+    {
+        Color src;
+        src = rhs;
+        Color ret;
+        foreach(c;TypeTuple!('r','g','b'))
+        {
+            mixin(format("const val = (%1$s*rhs.%1$s/255);",c));
+            assert(val >= 0 && val < 256, debugConv(val));
+            mixin(format("ret.%1$s = cast(ubyte)val;",c));
         }
         return ret;
     }
@@ -207,7 +222,7 @@ pure nothrow:
     }
 }
 
-private void isColorImpl(bool b)(Color!b c) {}
+private void isColorImpl(bool b)(in Color!b c) {}
 
 template isColor(T) {
     enum isColor = is(typeof(isColorImpl(T.init)));
@@ -297,7 +312,9 @@ pure nothrow:
 
     @property opDispatch(string s)(in DataType value) if(IsValidProp!s)
     {
-        mixin("data = ("~s[0]~"mask & (value << "~s[0]~"shift));");
+        assert(value >= 0);
+        mixin("assert(value <= "~s[0]~"max);");
+        mixin("data = (data & ~"~s[0]~"mask) | (value << "~s[0]~"shift);");
     }
     @property opDispatch(string s)() const if(IsValidProp!s)
     {
@@ -305,12 +322,11 @@ pure nothrow:
     }
 }
 
-private void isTemplateColorImpl(int Size, uint rm, uint gm, uint bm, uint am)(TemplateColor!(Size,rm,gm,bm,am) c) {}
+private void isTemplateColorImpl(int Size, uint rm, uint gm, uint bm, uint am)(in TemplateColor!(Size,rm,gm,bm,am) c) {}
 
 template isTemplateColor(T) {
     enum isTemplateColor = is(typeof(isTemplateColorImpl(T.init)));
 }
-
 
 unittest
 {
@@ -335,7 +351,6 @@ unittest
     col1.r = 255;
     col1.g = 0;
     col1.b = 0;
-    col1.a = 0;
     col2 = col1;
     assert(col2 == ColorRed, debugConv(col2));
 }
