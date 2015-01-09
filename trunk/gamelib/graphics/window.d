@@ -7,6 +7,7 @@ import std.exception;
 import derelict.sdl2.sdl;
 
 import gamelib.types;
+import gamelib.graphics.color;
 import gamelib.graphics.surface;
 
 class ColorFormatException : Exception
