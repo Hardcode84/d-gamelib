@@ -127,7 +127,13 @@ pure nothrow:
     }
     auto opBinary(string op : "+")(in Color rhs) const
     {
-        return fromRaw(toRaw() + rhs.toRaw());
+        //return fromRaw(toRaw() + rhs.toRaw());
+        Color ret;
+        foreach(c;TypeTuple!('r','g','b','a'))
+        {
+            mixin(format("ret.%1$s = cast(ubyte)min(%1$s+rhs.%1$s,255);",c));
+        }
+        return ret;
     }
 
     auto opBinary(string op : "*",T)(in T rhs) const if(isFloatingPoint!T || isIntegral!T)
@@ -135,8 +141,7 @@ pure nothrow:
         Color ret;
         foreach(c;TypeTuple!('r','g','b'))
         {
-            enum str = format("ret.%1$s = cast(ubyte)(%1$s*rhs);",c);
-            mixin(str);
+            mixin(format("ret.%1$s = cast(ubyte)(%1$s*rhs);",c));
         }
         return ret;
     }
