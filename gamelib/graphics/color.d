@@ -5,6 +5,7 @@ import std.algorithm;
 import std.range;
 import std.typetuple;
 
+import gamelib.math;
 import gamelib.types;
 
 struct Color(bool bgra = false)
@@ -89,6 +90,16 @@ pure nothrow:
             mixin(str);
         }
         return ret;
+    }
+
+    auto distanceSquared(in Color col) const
+    {
+        return (r - col.r)^^2 + (g - col.g)^^2 + (b - col.b)^^2 + (a - col.a)^^2;
+    }
+
+    auto distance(in Color col) const
+    {
+        return sqrt(distanceSquared(col));
     }
 
     auto toRaw() const
