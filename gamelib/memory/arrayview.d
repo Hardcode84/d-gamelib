@@ -5,39 +5,59 @@ import gamelib.types;
 
 struct ArrayView(T)
 {
+@nogc:
 pure nothrow:
 private:
     T[] array;
     ptrdiff_t zeroIndex = 0;
 public:
-    this(T[] src, ptrdiff_t low = 0)
+    this(T[] src, ptrdiff_t lowInd = 0)
     {
         array = src;
-        zeroIndex = low;
+        zeroIndex = lowInd;
     }
 
-    auto opIndex(ptrdiff_t i) const
+    ref auto opIndex(ptrdiff_t i) inout
+    in
+    {
+        assert(i >= low, debugConv(i," ",low," ",high));
+        assert(i < high, debugConv(i," ",low," ",high));
+    }
+    body
     {
         return array[i - zeroIndex];
     }
 
-    auto opIndexAssign(U)(U val, ptrdiff_t i) if(isAssignable!(T,U))
-    {
-        return array[i - zeroIndex] = val;
-    }
-
     auto opSlice(ptrdiff_t i1,ptrdiff_t i2) inout
+    in
+    {
+        assert(i1 >= low,  debugConv(i1," ",i2," ",low," ",high));
+        assert(i1 <= high, debugConv(i1," ",i2," ",low," ",high));
+        assert(i2 >= low,  debugConv(i1," ",i2," ",low," ",high));
+        assert(i2 <= high, debugConv(i1," ",i2," ",low," ",high));
+        assert(i2 >= i1,   debugConv(i1," ",i2," ",low," ",high));
+    }
+    body
     {
         return array[i1 - zeroIndex..i2 - zeroIndex];
     }
 
     auto opSliceAssign(U)(in U val, ptrdiff_t i1,ptrdiff_t i2) if(isAssignable!(T[],U))
+    in
+    {
+        assert(i1 >= low,  debugConv(i1," ",i2," ",low," ",high));
+        assert(i1 <= high, debugConv(i1," ",i2," ",low," ",high));
+        assert(i2 >= low,  debugConv(i1," ",i2," ",low," ",high));
+        assert(i2 <= high, debugConv(i1," ",i2," ",low," ",high));
+        assert(i2 >= i1,   debugConv(i1," ",i2," ",low," ",high));
+    }
+    body
     {
         return array[i1 - zeroIndex..i2 - zeroIndex] = val;
     }
 
     @property low()  const { return zeroIndex; }
-    @property high() const { return array.length + zeroIndex; }
+    @property high() const { return cast(ptrdiff_t)array.length + zeroIndex; }
 }
 
 unittest
