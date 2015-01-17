@@ -13,6 +13,11 @@ private:
 public:
     this(T[] src, ptrdiff_t lowInd = 0)
     {
+        assign(src,lowInd);
+    }
+
+    void assign(T[] src, ptrdiff_t lowInd = 0)
+    {
         array = src;
         zeroIndex = lowInd;
     }

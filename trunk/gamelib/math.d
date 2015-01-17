@@ -74,7 +74,7 @@ body
 
 auto log2(T)(in T val) if(isFloatingPoint!T)
 {
-    return smath.log2;
+    return smath.log2(val);
 }
 
 extern (C) { float fmodf(float x, float y); }
