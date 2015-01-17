@@ -10,21 +10,29 @@ import gamelib.types;
 
 struct Color(bool bgra = false)
 {
+@nogc:
 pure nothrow:
     import std.string;
-    static if(bgra)
+    union
     {
-        ubyte b = 255;
-        ubyte g = 255;
-        ubyte r = 255;
-        ubyte a = SDL_ALPHA_OPAQUE;
-    }
-    else
-    {
-        ubyte r = 255;
-        ubyte g = 255;
-        ubyte b = 255;
-        ubyte a = SDL_ALPHA_OPAQUE;
+        struct
+        {
+            static if(bgra)
+            {
+                ubyte b = 255;
+                ubyte g = 255;
+                ubyte r = 255;
+                ubyte a = SDL_ALPHA_OPAQUE;
+            }
+            else
+            {
+                ubyte r = 255;
+                ubyte g = 255;
+                ubyte b = 255;
+                ubyte a = SDL_ALPHA_OPAQUE;
+            }
+        }
+        private uint data;
     }
     //enum format = SDL_PIXELFORMAT_RGBA8888;
     static if(bgra)
@@ -44,7 +52,11 @@ pure nothrow:
 
     private void assign(U)(in U x)
     {
-        static if(isColor!U)
+        static if(is(U : Color))
+        {
+            data = x.toRaw();
+        }
+        else static if(isColor!U)
         {
             foreach(c;TypeTuple!('r','g','b','a'))
             {
@@ -102,17 +114,10 @@ pure nothrow:
         return sqrt(distanceSquared(col));
     }
 
-    auto toRaw() const
+    uint toRaw() const
     {
         static assert(this.sizeof == uint.sizeof);
-        union U
-        {
-            Color c;
-            uint i;
-        }
-        U u = void;
-        u.c = this;
-        return u.i;
+        return this.data;
     }
     static auto fromRaw(in uint i)
     {
@@ -166,7 +171,7 @@ pure nothrow:
             ((col2.toRaw() & 0xfefefefe) >> 1));
     }
 
-    @nogc static void interpolateLine(int LineSize, Rng)(Rng rng, in Color col1, in Color col2)
+    static void interpolateLine(int LineSize, Rng)(Rng rng, in Color col1, in Color col2)
     if(isRandomAccessRange!Rng)
     {
         /*foreach(i;0..LineSize)
@@ -197,7 +202,7 @@ pure nothrow:
         }
     }
 
-    @nogc static void interpolateLine(Rng)(int lineSize, Rng rng, in Color col1, in Color col2)
+    static void interpolateLine(Rng)(int lineSize, Rng rng, in Color col1, in Color col2)
     if(isRandomAccessRange!Rng)
     {
         assert(lineSize >= 0);
@@ -222,7 +227,7 @@ pure nothrow:
         }
     }
 
-    @nogc private static void interpolateLineImpl(Rng)(int lineSize, Rng rng, in Color col1, in Color col2)
+    private static void interpolateLineImpl(Rng)(int lineSize, Rng rng, in Color col1, in Color col2)
     if(isRandomAccessRange!Rng)
     {
         /*foreach(i;0..lineSize)
