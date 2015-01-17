@@ -199,29 +199,85 @@ void downsample(BitmapT)(BitmapT dst, BitmapT src)
     }
 }
 
-@nogc void ditherColorLine(LineT,ColT)(auto ref LineT line, int x0, int x1, int y, in ColT col1, in ColT col2) pure nothrow
+@nogc:
+pure nothrow:
+
+private auto genDithPatterns(int Len)()
 {
-    enum W = 8;
-    enum H = 8;
-    immutable ColT[2] cols = [col1, col2];
-    static immutable patterns = [
-        [0,0,0,0,1,1,1,1],
-        [0,0,0,1,0,1,1,1],
-        [0,0,1,0,1,0,1,1],
-        [0,1,0,1,0,1,0,1],
-        
-        [0,0,1,0,1,0,1,1],
-        [0,1,0,1,0,1,0,1],
-        [0,0,1,0,1,0,1,1],
-        [0,0,0,1,0,1,1,1]];
-    static assert(patterns.length    == H);
-    static assert(patterns[0].length == W);
-    const p = patterns[y % H];
-    auto l = line[x0..x1];
-    foreach(x;0..l.length)
+    static assert(Len > 1);
+    static assert(Len <= 32);
+    //static assert(ispow2(Len));
+    alias Type = uint;
+    enum Size = Type.sizeof * 8;
+    enum Mask = Size - 1;
+    enum Half = Len / 2;
+    Type[Len] ret;
+    static if(Len > 4)
     {
-        const xw = x % W;
-        l[x] = cols[p[xw]];
+        const m3 = 0x7fffffff >> (Size - Len);
+        const m4 = 0x1;
     }
-    //ColT.interpolateLine!H(line[x0..x1],col1,col2);
+    else
+    {
+        const m3 = 0xffffffff;
+        const m4 = 0x0;
+    }
+    foreach(i;0..Half)
+    {
+        const s1 = (Size - Half + i);
+        const m1 = s1 < 32 ? (0xffffffff >> s1) : 0x0;
+        const m2 = 0xaaaaaaaa >> (Size - Half - i);
+        ret[i] = ((m1 | m2) & m3) | m4;
+    }
+    foreach(i;Half..Len)
+    {
+        const s1 = (Size + Half - i);
+        const m1 = s1 < 32 ? (0xffffffff >> s1) : 0x0;
+        const m2 = 0xaaaaaaaa >> (Size + i - Half * 3);
+        ret[i] = ((m1 | m2) & m3) | m4;
+    }
+    return ret;
+}
+
+unittest
+{
+    enum ret = genDithPatterns!8;
+
+    static assert(ret.length == 8);
+    static immutable patterns8 = [
+        0b0000_1111,
+        0b0001_0111,
+        0b0010_1011,
+        0b0101_0101,
+
+        0b0010_1011,
+        0b0101_0101,
+        0b0010_1011,
+        0b0001_0111];
+    static assert(ret == patterns8);
+    import std.typetuple;
+    foreach(c;TypeTuple!(2,3,4,5,6,7,8,16,32))
+    {
+        enum p = genDithPatterns!c;
+        cast(void)p;
+        /*debugOut("-----");
+        foreach(v;p[])
+        {
+            debugfOut("%032b",v);
+        }*/
+    }
+}
+
+auto ditherPixel(int Len,ColT)(int x, int y, in ColT col1, in ColT col2)
+{
+    static immutable patterns = genDithPatterns!Len;
+    return (patterns[y % Len] & (1 << (x % Len))) ? col1 : col2;
+}
+
+void ditherLine(int Len,LineT,ColT)(auto ref LineT line, int x0, int x1, int y, in ColT col1, in ColT col2) pure nothrow
+{
+    foreach(x;x0..x1)
+    {
+        line[x] = ditherPixel!Len(x,y,col1,col2);
+    }
 }
