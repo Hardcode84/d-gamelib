@@ -2239,7 +2239,7 @@ struct Quaternion(type) {
 
         ret.matrix[0][0] = 1 - 2 * (yy + zz);
         ret.matrix[0][1] = 2 * (xy - zw);
-        + ret.matrix[0][2] = 2 * (xz + yw);
+        ret.matrix[0][2] = 2 * (xz + yw);
 
         ret.matrix[1][0] = 2 * (xy + zw);
         ret.matrix[1][1] = 1 - 2 * (xx + zz);
