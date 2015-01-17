@@ -47,22 +47,30 @@ private void foutImpl(T...)(in T args) pure nothrow @trusted
     }
 }
 
-private string convImpl(T)(in T val) pure nothrow @trusted
+private string convImpl(T...)(in T args) pure nothrow @trusted
 {
+    static assert(args.length > 0);
     debug
     {
         try
         {
+            import std.array;
             import std.conv;
-            return text(val);
+            string[args.length] ret;
+            foreach(i,a;args)
+            {
+                ret[i] = text(a);
+            }
+            return ret[].join;
         }
         catch(Exception e) { return ""; }
     }
     else return "";
 }
 
-@nogc:
-void debugOut(T...)(in T args) pure nothrow @trusted
+@nogc pure nothrow @trusted
+{
+void debugOut(T...)(in T args)
 {
     debug
     {
@@ -80,7 +88,7 @@ void debugOut(T...)(in T args) pure nothrow @trusted
     }
 }
 
-void debugfOut(T...)(in T args) pure nothrow @trusted
+void debugfOut(T...)(in T args)
 {
     debug
     {
@@ -98,7 +106,7 @@ void debugfOut(T...)(in T args) pure nothrow @trusted
     }
 }
 
-auto debugConv(T)(in T val) pure nothrow @trusted
+auto debugConv(T...)(in T args)
 {
     debug
     {
@@ -107,21 +115,22 @@ auto debugConv(T)(in T val) pure nothrow @trusted
             //dirty hack to shut up compiler
             mixin(`
             alias fn_t = string function(in T) pure nothrow @nogc;
-            return (cast(fn_t)&convImpl!T)(val); //hack to add @nogc`);
+            return (cast(fn_t)&convImpl!T)(args); //hack to add @nogc`);
         }
         else
         {
-            return convImpl(val);
+            return convImpl(args);
         }
     }
     else return "";
 }
-
+}
 debug unittest
 {
     assert("10" == debugConv("10"));
     assert("10" == debugConv(10));
     assert("1.1" == debugConv(1.1f));
+    assert("110foo" == debugConv(1,10,"foo"));
 
     debugOut("test debug out");
     debugOut(1);
