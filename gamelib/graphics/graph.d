@@ -274,8 +274,9 @@ auto ditherPixel(int Len,ColT)(int x, int y, in ColT col1, in ColT col2)
     return (patterns[y % Len] & (1 << (x % Len))) ? col1 : col2;
 }
 
-void ditherLine(int Len,LineT,ColT)(auto ref LineT line, int x0, int x1, int y, in ColT col1, in ColT col2) pure nothrow
+void ditherLine(int Len,LineT,ColT)(auto ref LineT line, int x0, int x1, int y, in ColT col1, in ColT col2)
 {
+    assert(x1 >= x0);
     foreach(x;x0..x1)
     {
         line[x] = ditherPixel!Len(x,y,col1,col2);

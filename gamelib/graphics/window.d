@@ -213,7 +213,7 @@ public:
     void updateSurface(Surface surf = null)
     {
         assert(mWindow);
-        if(surf !is null && surf !is mCachedSurf)
+        if(surf !is null)
         {
             blit(surf);
         }
