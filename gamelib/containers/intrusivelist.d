@@ -18,10 +18,6 @@ public:
         unlink();
     }
     @disable this(this);
-    /*{
-        mNext = null;
-        mPrev = null;
-    }*/
 
     void unlink()
     {
@@ -297,6 +293,26 @@ unittest
             assert(str == "43210",str);
             list.unlink();
             assert(list.empty);
+        }
+        {
+            NodeList list;
+            auto ns = [
+                new Node(0),
+                new Node(1),
+                new Node(2),
+                new Node(3),
+                new Node(4)];
+            foreach(n;ns[])
+            {
+                list.insertBack(n);
+            }
+            assert(!list.empty);
+            list.unlink();
+            assert(list.empty);
+            foreach(n;ns[])
+            {
+                assert(!n.link.isLinked);
+            }
         }
     }
     struct Foo
