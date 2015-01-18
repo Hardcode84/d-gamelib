@@ -28,7 +28,7 @@ private void call_dtor(T)(ref T obj) if(is(T == struct))
     {
         obj.__dtor;
     }
-    foreach_reverse(t;obj.tupleof)
+    foreach_reverse(ref t;obj.tupleof)
     {
         static if(is(typeof(t) == struct))
         {
