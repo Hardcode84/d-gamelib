@@ -68,11 +68,11 @@ private string convImpl(T...)(in T args) pure nothrow @trusted
     else return "";
 }
 
-@nogc pure nothrow @trusted
+
+debug
 {
-void debugOut(T...)(in T args)
-{
-    debug
+    @nogc pure nothrow @trusted:
+    void debugOut(T...)(in T args)
     {
         static if(HasNogc)
         {
@@ -86,11 +86,8 @@ void debugOut(T...)(in T args)
             outImpl(args);
         }
     }
-}
 
-void debugfOut(T...)(in T args)
-{
-    debug
+    void debugfOut(T...)(in T args)
     {
         static if(HasNogc)
         {
@@ -104,11 +101,8 @@ void debugfOut(T...)(in T args)
             foutImpl(args);
         }
     }
-}
 
-auto debugConv(T...)(in T args)
-{
-    debug
+    auto debugConv(T...)(in T args)
     {
         static if(HasNogc)
         {
@@ -122,9 +116,18 @@ auto debugConv(T...)(in T args)
             return convImpl(args);
         }
     }
-    else return "";
 }
+else
+{
+    @nogc pure nothrow @trusted:
+    void debugOut(T...)(in T args) {}
+    void debugfOut(T...)(in T args) {}
+    auto debugConv(T...)(in T args) { return ""; }
+    void debugOut(T...)(in ref T args) {}
+    void debugfOut(T...)(in ref T args) {}
+    auto debugConv(T...)(in ref T args) { return ""; }
 }
+
 debug unittest
 {
     assert("10" == debugConv("10"));

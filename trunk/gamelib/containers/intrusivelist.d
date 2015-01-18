@@ -17,11 +17,11 @@ public:
     {
         unlink();
     }
-    this(this)
-    {
+    @disable this(this);
+    /*{
         mNext = null;
         mPrev = null;
-    }
+    }*/
 
     void unlink()
     {
@@ -48,11 +48,6 @@ struct IntrusiveList(T, string Field) if(is(T == struct) || is(T == class))
 pure nothrow:
 private:
     IntrusiveListLink mHead;
-    static auto getObject(inout(IntrusiveListLink)* p) @trusted
-    {
-        mixin("enum offset = T."~Field~".offsetof;");
-        return cast(inout(T)*)(cast(inout(void)*)p - offset);
-    }
     static if(is(T == struct))
     {
         alias Ptr = T*;
@@ -60,6 +55,11 @@ private:
     else
     {
         alias Ptr = T;
+    }
+    static auto getObject(inout(IntrusiveListLink)* p) @trusted
+    {
+        mixin("enum offset = T."~Field~".offsetof;");
+        return cast(inout(Ptr))(cast(inout(void)*)p - offset);
     }
     static auto getLink(inout Ptr obj) @trusted
     {
@@ -147,10 +147,10 @@ public:
         }
 
         /// ditto
-        @property ref front() inout
+        @property front() inout
         {
             assert(!empty);
-            return *getObject(mFirst);
+            return getObject(mFirst);
         }
 
         /// ditto
@@ -171,12 +171,14 @@ public:
 
         /// Forward range primitive.
         @property Range save() { return this; }
-        
+
+        auto opSlice() { return this; }
+
         /// Bidirectional range primitives.
-        @property ref back() inout
+        @property back() inout
         {
             assert(!empty);
-            return *getObject(mLast);
+            return getObject(mLast);
         }
 
         /// ditto
@@ -225,21 +227,67 @@ public:
         }
     }
 
-    @property ref front() inout
+    @property front() inout
     {
         assert(!empty);
-        return *getObject(mHead.mNext);
+        return getObject(mHead.mNext);
     }
-    @property ref back() inout
+    @property back() inout
     {
         assert(!empty);
-        return *getObject(mHead.mPrev);
+        return getObject(mHead.mPrev);
     }
 }
 
 unittest
 {
-    struct Node
+    void test(Node)()
+    {
+        alias NodeList = IntrusiveList!(Node,"link");
+        {
+            NodeList list;
+            assert(list.empty);
+            list.insertFront(new Node);
+            assert(!list.empty);
+            list.front.link.unlink();
+            assert(list.empty);
+            list.insertBack(new Node);
+            assert(!list.empty);
+            list.back.link.unlink();
+            assert(list.empty);
+        }
+        {
+            import std.conv;
+            NodeList list;
+            string str;
+            list.insertFront(new Node(0));
+            list.insertFront(new Node(1));
+            list.insertFront(new Node(2));
+            list.insertFront(new Node(3));
+            list.insertFront(new Node(4));
+            foreach(n;list[])
+            {
+                str ~= text(n.i);
+            }
+            assert(str == "43210",str);
+            list.unlink();
+            assert(list.empty);
+            str.length = 0;
+            list.insertBack(new Node(0));
+            list.insertBack(new Node(1));
+            list.insertBack(new Node(2));
+            list.insertBack(new Node(3));
+            list.insertBack(new Node(4));
+            foreach(n;list[])
+            {
+                str ~= text(n.i);
+            }
+            assert(str == "01234",str);
+            list.unlink();
+            assert(list.empty);
+        }
+    }
+    struct Foo
     {
         int i;
         IntrusiveListLink link;
@@ -248,47 +296,15 @@ unittest
             i = _i;
         }
     }
-    alias NodeList = IntrusiveList!(Node,"link");
+    class Bar
     {
-        NodeList list;
-        assert(list.empty);
-        list.insertFront(new Node);
-        assert(!list.empty);
-        list.front.link.unlink();
-        assert(list.empty);
-        list.insertBack(new Node);
-        assert(!list.empty);
-        list.back.link.unlink();
-        assert(list.empty);
-    }
-    {
-        import std.conv;
-        NodeList list;
-        string str;
-        list.insertFront(new Node(0));
-        list.insertFront(new Node(1));
-        list.insertFront(new Node(2));
-        list.insertFront(new Node(3));
-        list.insertFront(new Node(4));
-        foreach(n;list[])
+        int i;
+        IntrusiveListLink link;
+        this(int _i = 0)
         {
-            str ~= text(n.i);
+            i = _i;
         }
-        assert(str == "43210",str);
-        list.unlink();
-        assert(list.empty);
-        str.length = 0;
-        list.insertBack(new Node(0));
-        list.insertBack(new Node(1));
-        list.insertBack(new Node(2));
-        list.insertBack(new Node(3));
-        list.insertBack(new Node(4));
-        foreach(n;list[])
-        {
-            str ~= text(n.i);
-        }
-        assert(str == "01234",str);
-        list.unlink();
-        assert(list.empty);
     }
+    test!Foo();
+    test!Bar();
 }
