@@ -1,4 +1,4 @@
-﻿module gamelib.queue;
+﻿module gamelib.containers.queue;
 
 //Based on http://rosettacode.org/wiki/Queue/Usage#Faster_Version
 struct GrowableCircularQueue(T)

@@ -8,7 +8,7 @@ auto allocate(T,A...)(auto ref A args) if (!is(T == class))
     import core.stdc.stdlib : malloc;
     import std.conv : emplace;
     //import std.exception : enforce;
-    
+
     auto ret = cast(T*) malloc(T.sizeof);
     if(ret is null)
     {
