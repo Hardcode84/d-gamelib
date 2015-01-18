@@ -50,9 +50,14 @@ unittest
 
 unittest
 {
+    class C {}
+    interface I {}
     struct Foo
     {
         bool* b;
+        C c;
+        I i;
+        @disable this(this);
         ~this()
         {
             if( b )
@@ -65,6 +70,8 @@ unittest
     {
         bool* b;
         Foo f;
+        C c;
+        I i;
         ~this()
         {
             if( b )
