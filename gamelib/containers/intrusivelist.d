@@ -270,6 +270,12 @@ unittest
                 str ~= text(n.i);
             }
             assert(str == "43210",str);
+            str.length = 0;
+            foreach_reverse(n;list[])
+            {
+                str ~= text(n.i);
+            }
+            assert(str == "01234",str);
             list.unlink();
             assert(list.empty);
             str.length = 0;
@@ -283,6 +289,12 @@ unittest
                 str ~= text(n.i);
             }
             assert(str == "01234",str);
+            str.length = 0;
+            foreach_reverse(n;list[])
+            {
+                str ~= text(n.i);
+            }
+            assert(str == "43210",str);
             list.unlink();
             assert(list.empty);
         }
