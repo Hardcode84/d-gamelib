@@ -76,7 +76,8 @@ public:
     {
         assert(item !is null);
         assert(!getLink(item).isLinked);
-        if(mHead.mPrev is null || mHead.mNext is null)
+        assert(!!mHead.mPrev == !!mHead.mNext);
+        if(mHead.mPrev is null)
         {
             mHead.mPrev = &mHead;
             mHead.mNext = &mHead;
@@ -91,7 +92,8 @@ public:
     {
         assert(item !is null);
         assert(!getLink(item).isLinked);
-        if(mHead.mPrev is null || mHead.mNext is null)
+        assert(!!mHead.mPrev == !!mHead.mNext);
+        if(mHead.mPrev is null)
         {
             mHead.mPrev = &mHead;
             mHead.mNext = &mHead;
@@ -155,8 +157,8 @@ public:
             assert(!empty);
             if(mFirst is mLast)
             {
-                mFirst =null;
-                mLast = null;
+                mFirst = null;
+                mLast  = null;
             }
             else
             {
@@ -183,8 +185,8 @@ public:
             assert(!empty);
             if(mFirst is mLast)
             {
-                mFirst =null;
-                mLast = null;
+                mFirst = null;
+                mLast  = null;
             }
             else
             {
