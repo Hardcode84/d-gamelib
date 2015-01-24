@@ -44,35 +44,26 @@ public:
                 }
                 getLast!T() = &arr[$ - 1];
             }
-            /*EntityRef[] refs;
-            refs.length = initialSize;
-            refs[0].prev = null;
-            foreach(i;1..initialSize)
-            {
-                refs[i].prev = &refs[i - 1];
-            }
-            mLast = &refs[$ - 1];*/
         }
     }
-    /*EntityRef* allocate()
+    auto allocate(T)() if(is(T == struct))
     {
-        if(mLast is null)
+        if(getLast!T() is null)
         {
-            return new EntityRef;
+            return new T;
         }
-        auto temp = mLast;
-        mLast = temp.prev;
-        *temp = EntityRef.init;
+        T* temp = getLast!T();
+        getLast!T() = temp.prev;
+        *temp = T.init;
         return temp;
     }
-    
-    void free(EntityRef* ptr)
+    void free(T)(T* ptr) if(is(T == struct))
     {
-        destruct(*ptr);
         assert(ptr !is null);
-        ptr.prev = mLast;
-        mLast = ptr;
-    }*/
+        destruct(*ptr);
+        ptr.prev = getLast!T();
+        getLast!T() = ptr;
+    }
 }
 
 unittest
@@ -80,5 +71,16 @@ unittest
     struct Foo { Foo* prev; }
     struct Bar { Bar* prev; }
     auto alloc = new PoolAlloc!(Foo,Bar)(100);
+    {
+        auto f = alloc.allocate!Foo();
+        auto b = alloc.allocate!Bar();
+        alloc.free(f);
+        alloc.free(b);
+    }
+    {
+        auto f1 = alloc.allocate!Foo();
+        auto f2 = alloc.allocate!Foo();
+        assert(f1 !is f2);
+    }
 }
 
