@@ -47,6 +47,11 @@ public:
         }
     }
     auto allocate(T)() if(is(T == struct))
+    out(result)
+    {
+        assert(result !is null);
+    }
+    body
     {
         if(getLast!T() is null)
         {

@@ -104,7 +104,7 @@ public:
         mHead.mPrev.mNext = getLink(item);
         mHead.mPrev       = getLink(item);
     }
-    void unlink()
+    void clear()
     {
         IntrusiveListLink* curr = &mHead;
         while(curr.isLinked)
@@ -274,7 +274,7 @@ unittest
                 str ~= text(n.i);
             }
             assert(str == "01234",str);
-            list.unlink();
+            list.clear();
             assert(list.empty);
             str.length = 0;
             list.insertBack(new Node(0));
@@ -293,7 +293,7 @@ unittest
                 str ~= text(n.i);
             }
             assert(str == "43210",str);
-            list.unlink();
+            list.clear();
             assert(list.empty);
         }
         {
@@ -309,7 +309,7 @@ unittest
                 list.insertBack(n);
             }
             assert(!list.empty);
-            list.unlink();
+            list.clear();
             assert(list.empty);
             foreach(n;ns[])
             {
