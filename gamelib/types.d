@@ -149,11 +149,6 @@ struct Size
     int w, h;
 }
 
-template Tuple(E...)
-{
-    alias E Tuple;
-}
-
 mixin template SDL_CHECK(string S, string getErr = "SDL_GetError()")
 {
     auto temp = enforce(0 == (mixin(S)), "\"" ~ S ~ "\" failed: " ~ to!string(mixin(getErr)).idup);
