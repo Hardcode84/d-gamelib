@@ -32,14 +32,15 @@ package:
 public:
     this(in string title, in int width, in int height, Uint32 flags = 0)
     {
-        mixin SDL_CHECK_NULL!(`mWindow = SDL_CreateWindow(toStringz(title),
-                                   SDL_WINDOWPOS_UNDEFINED,
-                                   SDL_WINDOWPOS_UNDEFINED,
-                                   width,
-                                   height,
-                                   flags)`);
+        mWindow = sdlCheckNull!SDL_CreateWindow(
+            toStringz(title),
+            SDL_WINDOWPOS_UNDEFINED,
+            SDL_WINDOWPOS_UNDEFINED,
+            width,
+            height,
+            flags);
         SDL_SysWMinfo info;
-        mixin SDL_CHECK_BOOL!(`SDL_GetWindowWMInfo(mWindow,&info)`);
+        sdlCheckBool!SDL_GetWindowWMInfo(mWindow,&info);
         version(Windows)
         {
             mHDC = enforce(GetDC(info.info.win.window), "Unable to get HDC");
@@ -112,7 +113,7 @@ public:
         if(mCachedSurf is null)
         {
             SDL_Surface* surf = null;
-            mixin SDL_CHECK_NULL!(`surf = SDL_GetWindowSurface(mWindow)`);
+            surf = sdlCheckNull!SDL_GetWindowSurface(mWindow);
             const fmt = surf.format;
             //try to create typed surface
             if(1 == fmt.BytesPerPixel)
@@ -219,7 +220,7 @@ public:
         }
         else
         {
-            mixin SDL_CHECK!(`SDL_UpdateWindowSurface(mWindow)`);
+            sdlCheck!SDL_UpdateWindowSurface(mWindow);
         }
     }
 

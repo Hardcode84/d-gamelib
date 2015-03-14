@@ -27,7 +27,7 @@ public:
         assert(ren);
         assert(ren.mRenderer);
         immutable int access = (props.isStreaming ? SDL_TEXTUREACCESS_STREAMING : SDL_TEXTUREACCESS_STATIC);
-        mixin SDL_CHECK_NULL!(`mTexture = SDL_CreateTexture(ren.mRenderer, props.format, access, props.width, props.height)`);
+        mTexture = sdlCheckNull!SDL_CreateTexture(ren.mRenderer, props.format, access, props.width, props.height);
     }
     this(Renderer ren, in string file)
     {
@@ -38,16 +38,16 @@ public:
         }
         else
         {
-            mixin SDL_CHECK_NULL!(`surface = SDL_LoadBMP(toStringz(file))`);
+            surface = sdlCheckNull!SDL_LoadBMP(toStringz(file));
         }
         scope(exit) SDL_FreeSurface(surface);
-        mixin SDL_CHECK_NULL!(`mTexture = SDL_CreateTextureFromSurface(ren.mRenderer, surface)`);
+        mTexture = sdlCheckNull!SDL_CreateTextureFromSurface(ren.mRenderer, surface);
     }
     this(Renderer ren, Surface surf)
     {
         assert(surf !is null);
         assert(surf.mSurface !is null);
-        mixin SDL_CHECK_NULL!(`mTexture = SDL_CreateTextureFromSurface(ren.mRenderer, surf.mSurface)`);
+        mTexture = sdlCheckNull!SDL_CreateTextureFromSurface(ren.mRenderer, surf.mSurface);
     }
     ~this() const pure nothrow
     {
@@ -68,7 +68,7 @@ public:
         assert(mTexture);
         TextureProps ret;
         int access;
-        mixin SDL_CHECK!(`SDL_QueryTexture(mTexture, &ret.format, &access, &ret.width, &ret.height)`);
+        sdlCheck!SDL_QueryTexture(mTexture, &ret.format, &access, &ret.width, &ret.height);
         ret.isStreaming = (SDL_TEXTUREACCESS_STREAMING == access);
         return ret;
     }
@@ -76,7 +76,7 @@ public:
     @property void colorMod(ColT)(in ColT col)
     {
         assert(mTexture);
-        mixin SDL_CHECK!(`SDL_SetTextureColorMod(mTexture, col.r, col.g, col.b)`);
+        sdlCheck!SDL_SetTextureColorMod(mTexture, col.r, col.g, col.b);
     }
 
 }

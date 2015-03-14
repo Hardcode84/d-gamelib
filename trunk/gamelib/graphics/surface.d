@@ -35,11 +35,11 @@ final:
     {
         if(pixels is null)
         {
-            mixin SDL_CHECK_NULL!(`mSurface = SDL_CreateRGBSurface(0,width,height,depth,Rmask,Gmask,Bmask,Amask)`);
+            mSurface = sdlCheckNull!SDL_CreateRGBSurface(0,width,height,depth,Rmask,Gmask,Bmask,Amask);
         }
         else
         {
-            mixin SDL_CHECK_NULL!(`mSurface = SDL_CreateRGBSurfaceFrom(pixels,width,height,depth,pitch,Rmask,Gmask,Bmask,Amask)`);
+            mSurface = sdlCheckNull!SDL_CreateRGBSurfaceFrom(pixels,width,height,depth,pitch,Rmask,Gmask,Bmask,Amask);
         }
         mWidth = width;
         mHeight = height;
@@ -82,7 +82,7 @@ final:
         assert(mSurface);
         if(0 == mLockCount)
         {
-            mixin SDL_CHECK!(`SDL_LockSurface(mSurface)`);
+            sdlCheck!SDL_LockSurface(mSurface);
         }
         ++mLockCount;
     }
@@ -113,7 +113,7 @@ final:
     {
         assert(mSurface);
         assert(src.mSurface);
-        mixin SDL_CHECK!(`SDL_BlitSurface(src.mSurface,null,mSurface,null)`);
+        sdlCheck!SDL_BlitSurface(src.mSurface,null,mSurface,null);
     }
 }
 
@@ -167,7 +167,7 @@ public:
         tempunion_t u;
         u.i = 0;
         u.c = col;
-        mixin SDL_CHECK!(`SDL_FillRect(mSurface, null, u.i)`);
+        sdlCheck!SDL_FillRect(mSurface, null, u.i);
     }
 }
 
