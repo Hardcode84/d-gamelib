@@ -1,0 +1,1 @@
+Some useful stuff I wrote for my D games. Contains some code from derelict and gl3n libraries.
