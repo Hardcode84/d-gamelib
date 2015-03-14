@@ -19,7 +19,7 @@ public:
         if(video) sdlFlags |= SDL_INIT_VIDEO;
         if(sound) sdlFlags |= SDL_INIT_AUDIO;
 
-        mixin SDL_CHECK!(`SDL_Init(sdlFlags)`);
+        sdlCheck!SDL_Init(sdlFlags);
         SDL_LogSetOutputFunction(&logFunc, null);
         version(UseSDLImage)
         {

@@ -8,6 +8,8 @@ public import std.exception: enforce;
 public import derelict.sdl2.sdl;
 public import derelict.sdl2.image;
 
+public import gamelib.funcwrapper;
+
 alias SDL_Point Point;
 alias SDL_Rect Rect;
 
@@ -147,21 +149,6 @@ debug unittest
 struct Size
 {
     int w, h;
-}
-
-mixin template SDL_CHECK(string S, string getErr = "SDL_GetError()")
-{
-    auto temp = enforce(0 == (mixin(S)), "\"" ~ S ~ "\" failed: " ~ to!string(mixin(getErr)).idup);
-}
-
-mixin template SDL_CHECK_BOOL(string S, string getErr = "SDL_GetError()")
-{
-    auto temp = enforce(SDL_TRUE == (mixin(S)), "\"" ~ S ~ "\" failed: " ~ to!string(mixin(getErr)).idup);
-}
-
-mixin template SDL_CHECK_NULL(string S, string getErr = "SDL_GetError()")
-{
-    auto temp = enforce(null != (mixin(S)), "\"" ~ S ~ "\" failed: " ~ to!string(mixin(getErr)).idup);
 }
 
 unittest

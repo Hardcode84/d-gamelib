@@ -32,7 +32,7 @@ public:
         {
             flags |= SDL_RENDERER_TARGETTEXTURE;
         }
-        mixin SDL_CHECK_NULL!(`mRenderer = SDL_CreateRenderer(wnd.mWindow, props.index, flags)`);
+        mRenderer = sdlCheckNull!SDL_CreateRenderer(wnd.mWindow, props.index, flags);
     }
 
     ~this() const pure nothrow
@@ -52,7 +52,7 @@ public:
     void clear()
     {
         assert(mRenderer);
-        mixin SDL_CHECK!(`SDL_RenderClear(mRenderer)`);
+        sdlCheck!SDL_RenderClear(mRenderer);
     }
 
     void draw(Texture tex, in Rect* srcRect, in Rect* dstRect)
@@ -60,7 +60,7 @@ public:
         assert(mRenderer);
         assert(tex);
         assert(tex.mTexture);
-        mixin SDL_CHECK!(`SDL_RenderCopy(mRenderer,tex.mTexture,srcRect,dstRect)`);
+        sdlCheck!SDL_RenderCopy(mRenderer,tex.mTexture,srcRect,dstRect);
     }
     void draw(Texture tex, 
               in Rect* srcRect, 
@@ -72,37 +72,37 @@ public:
         assert(mRenderer);
         assert(tex);
         assert(tex.mTexture);
-        mixin SDL_CHECK!(`SDL_RenderCopyEx(mRenderer,tex.mTexture,srcRect,dstRect,angle,center,flip)`);
+        sdlCheck!SDL_RenderCopyEx(mRenderer,tex.mTexture,srcRect,dstRect,angle,center,flip);
     }
 
     @property void drawColor(ColT)(in ColT col)
     {
         assert(mRenderer);
-        mixin SDL_CHECK!(`SDL_SetRenderDrawColor(mRenderer,col.r,col.g,col.b,col.a)`);
+        sdlCheck!SDL_SetRenderDrawColor(mRenderer,col.r,col.g,col.b,col.a);
     }
 
     void drawLines(in Point[] points)
     {
         assert(mRenderer);
-        mixin SDL_CHECK!(`SDL_RenderDrawLines(mRenderer,points.ptr,points.length)`);
+        sdlCheck!SDL_RenderDrawLines(mRenderer,points.ptr,points.length);
     }
 
     void drawPoints(in Point[] points)
     {
         assert(mRenderer);
-        mixin SDL_CHECK!(`SDL_RenderDrawPoints(mRenderer,points.ptr,points.length)`);
+        sdlCheck!SDL_RenderDrawPoints(mRenderer,points.ptr,points.length);
     }
 
     void drawRects(in Rect[] rects)
     {
         assert(mRenderer);
-        mixin SDL_CHECK!(`SDL_RenderDrawRects(mRenderer,rects.ptr,rects.length)`);
+        sdlCheck!SDL_RenderDrawRects(mRenderer,rects.ptr,rects.length);
     }
 
     void drawFilledRects(in Rect[] rects)
     {
         assert(mRenderer);
-        mixin SDL_CHECK!(`SDL_RenderFillRects(mRenderer,rects.ptr,rects.length)`);
+        sdlCheck!SDL_RenderFillRects(mRenderer,rects.ptr,rects.length);
     }
 
     void present()
@@ -114,19 +114,19 @@ public:
     void setScale(in float scaleX, in float scaleY)
     {
         assert(mRenderer);
-        mixin SDL_CHECK!(`SDL_RenderSetScale(mRenderer,scaleX,scaleY)`);
+        sdlCheck!SDL_RenderSetScale(mRenderer,scaleX,scaleY);
     }
 
     @property auto viewport(in Rect rc)
     {
         assert(mRenderer);
-        mixin SDL_CHECK!(`SDL_RenderSetViewport(mRenderer,&rc)`);
+        sdlCheck!SDL_RenderSetViewport(mRenderer,&rc);
     }
 
     @property auto clipRect(in Rect rc)
     {
         assert(mRenderer);
-        mixin SDL_CHECK!(`SDL_RenderSetClipRect(mRenderer,&rc)`);
+        sdlCheck!SDL_RenderSetClipRect(mRenderer,&rc);
     }
 }
 
