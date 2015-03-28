@@ -10,6 +10,11 @@ import gamelib.types;
 import gamelib.graphics.color;
 import gamelib.graphics.surface;
 
+version(Windows)
+{
+    pragma(lib, "Gdi32");
+}
+
 class ColorFormatException : Exception
 {
     @safe pure nothrow this(string msg, string file = __FILE__, size_t line = __LINE__, Throwable next = null)
