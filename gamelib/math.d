@@ -36,9 +36,8 @@ public {
 private {
     import std.conv : to;
     import std.algorithm : all;
-    import std.array : zip;
     import std.traits : CommonType, isIntegral, isFloatingPoint, isUnsigned, Unsigned;
-    import std.range : ElementType;
+    import std.range : ElementType, zip;
     import smath = std.math;
     
     import gamelib.util : is_vector, is_quaternion, is_matrix;

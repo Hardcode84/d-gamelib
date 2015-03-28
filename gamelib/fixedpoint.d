@@ -314,7 +314,7 @@ private:
     enum value_t HIGH_MASK = ~LOW_MASK;
     static assert((ONE & LOW_MASK) == 0);
 
-    static bool isOk(T)(in T i) pure nothrow nothrow if(isIntegral!T)
+    static bool isOk(T)(in T i) pure nothrow if(isIntegral!T)
     {
         return i <= value_t.max && i >= value_t.min;
     }
