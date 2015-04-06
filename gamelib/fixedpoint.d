@@ -482,7 +482,7 @@ body
 
 auto sin(U)(in U x) pure nothrow if(isFixedPoint!U)
 {
-    static if(__ctfe)
+    if(__ctfe)
     {
         //taylor series
         U val = 1;
@@ -497,7 +497,7 @@ auto sin(U)(in U x) pure nothrow if(isFixedPoint!U)
     }
     else
     {
-        static assert(false,"not implemented");
+        assert(false,"not implemented");
     }
 }
 
