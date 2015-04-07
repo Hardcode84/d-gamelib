@@ -12,7 +12,9 @@ pure nothrow:
 public:
     this() @disable;
 
-    alias data this;
+    alias get this;
+
+    auto get() inout { return mData; }
 
 private:
     this(T r)
@@ -22,14 +24,14 @@ private:
     }
     body
     {
-        data = r;
+        mData = r;
     }
 
     invariant
     {
-        assert(data !is null);
+        assert(mData !is null);
     }
-    T data;
+    T mData;
 }
 
 auto makeSafe(T,Args...)(auto ref Args args)
