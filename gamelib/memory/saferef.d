@@ -5,7 +5,7 @@ import std.typecons;
 import std.algorithm;
 import std.traits;
 
-struct SafeRef(T) if(is(T == class))
+struct SafeRef(T)
 {
 pure nothrow:
 @nogc:
@@ -17,21 +17,21 @@ public:
     auto get() inout { return mData; }
 
 private:
-    this(T r)
-    in
+    static if(is(T == class) || is(T == interface))
     {
-        assert(r !is null);
+        T mData;
+        this(T r) { mData = r; }
     }
-    body
+    else
     {
-        mData = r;
+        T* mData;
+        this(T* r) { mData = r; }
     }
 
     invariant
     {
         assert(mData !is null);
     }
-    T mData;
 }
 
 auto makeSafe(T,Args...)(auto ref Args args)
@@ -39,21 +39,33 @@ auto makeSafe(T,Args...)(auto ref Args args)
     return SafeRef!T(new T(args));
 }
 
-auto convertSafe(T)(T r) pure if(is(T == class))
+auto convertSafe(T)(T r) pure
 {
     import std.exception: enforce;
     enforce(r !is null, "Null reference");
     return SafeRef!T(r);
 }
 
-private auto convertUnsafe(T)(T r) @nogc pure nothrow if(is(T == class))
+private template removePointer(T)
+{
+    static if( isPointer!T )
+    {
+        alias removePointer = pointerTarget!T;
+    }
+    else
+    {
+        alias removePointer = T;
+    }
+}
+
+private auto convertUnsafe(T)(T r) @nogc pure nothrow
 in
 {
     assert(r !is null);
 }
 body
 {
-    return SafeRef!T(r);
+    return SafeRef!(removePointer!T)(r);
 }
 
 private auto convertUnsafeTuple(T...)(T args) @nogc pure nothrow
@@ -65,7 +77,7 @@ private auto convertUnsafeTuple(T...)(T args) @nogc pure nothrow
 }
 
 bool convertSafe(H,T...)(auto ref H handler, T args)
-    if(isCallable!H && args.length > 0 && allSatisfy!(a => is(a == class) ,tuple(args).Types))
+    if(isCallable!H && args.length > 0)
 {
     foreach(ref a;args)
     {
@@ -79,7 +91,7 @@ bool convertSafe(H,T...)(auto ref H handler, T args)
 }
 
 auto convertSafe2(H1,H2,T...)(auto ref H1 handler1, auto ref H2 handler2, T args)
-    if(isCallable!H1 && isCallable!H2 && args.length > 0 && allSatisfy!(a => is(a == class) ,tuple(args).Types))
+    if(isCallable!H1 && isCallable!H2 && args.length > 0)
 {
     foreach(ref a;args)
     {
@@ -145,4 +157,9 @@ unittest
                 f, f2));
     }
     test2();
+
+    int i = 0;
+    int* pi = &i;
+    assert(convertSafe((SafeRef!int a) @nogc { *a = 1; }, pi));
+    assert(i == 1);
 }
