@@ -9,6 +9,7 @@ struct SafeRef(T)
 {
 pure nothrow:
 @nogc:
+@safe:
 public:
     this() @disable;
 
