@@ -84,25 +84,25 @@ public:
     void drawLines(in Point[] points)
     {
         assert(mRenderer);
-        sdlCheck!SDL_RenderDrawLines(mRenderer,points.ptr,points.length);
+        sdlCheck!SDL_RenderDrawLines(mRenderer,points.ptr,cast(uint)points.length);
     }
 
     void drawPoints(in Point[] points)
     {
         assert(mRenderer);
-        sdlCheck!SDL_RenderDrawPoints(mRenderer,points.ptr,points.length);
+        sdlCheck!SDL_RenderDrawPoints(mRenderer,points.ptr,cast(uint)points.length);
     }
 
     void drawRects(in Rect[] rects)
     {
         assert(mRenderer);
-        sdlCheck!SDL_RenderDrawRects(mRenderer,rects.ptr,rects.length);
+        sdlCheck!SDL_RenderDrawRects(mRenderer,rects.ptr,cast(uint)rects.length);
     }
 
     void drawFilledRects(in Rect[] rects)
     {
         assert(mRenderer);
-        sdlCheck!SDL_RenderFillRects(mRenderer,rects.ptr,rects.length);
+        sdlCheck!SDL_RenderFillRects(mRenderer,rects.ptr,cast(uint)rects.length);
     }
 
     void present()
