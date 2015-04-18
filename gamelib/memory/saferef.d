@@ -69,6 +69,20 @@ body
     return SafeRef!(removePointer!T)(r);
 }
 
+auto convertUnsafeRef(T)(auto ref T r) @nogc pure nothrow
+{
+    static if(is(T == struct))
+    {
+        return SafeRef!(removePointer!T)(&r);
+    }
+    else static if(is(T == class) || is(T == interface))
+    {
+        assert(r !is null);
+        return SafeRef!(T)(r);
+    }
+    else static assert(false);
+}
+
 private auto convertUnsafeTuple(T...)(T args) @nogc pure nothrow
 {
     import std.string: format;
@@ -104,6 +118,11 @@ auto convertSafe2(H1,H2,T...)(auto ref H1 handler1, auto ref H2 handler2, T args
     return handler1(convertUnsafeTuple(args).expand);
 }
 
+mixin template SafeThis()
+{
+    auto safeThis = convertUnsafeRef(this);
+}
+
 version(unittest)
 {
     private class Foo
@@ -116,6 +135,12 @@ version(unittest)
         void set() { flag = true; }
         void reset() { flag = false; }
         void test() { assert(flag); }
+
+        SafeRef!Foo getSafe()
+        {
+            mixin SafeThis;
+            return safeThis;
+        }
     }
 }
 
@@ -163,4 +188,7 @@ unittest
     int* pi = &i;
     assert(convertSafe((SafeRef!int a) @nogc { *a = 1; }, pi));
     assert(i == 1);
+    f.getSafe().reset();
+    f.getSafe().set();
+    f.getSafe().test();
 }
