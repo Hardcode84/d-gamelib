@@ -216,7 +216,7 @@ public:
         else
         {
             surface.blit(surf);
-            mixin SDL_CHECK!(`SDL_UpdateWindowSurface(mWindow)`);
+            sdlCheck!SDL_UpdateWindowSurface(mWindow);
         }
     }
 

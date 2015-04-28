@@ -86,7 +86,7 @@ final:
         }
         ++mLockCount;
     }
-    void unlock() nothrow
+    @nogc void unlock() nothrow
     {
         assert(mSurface);
         assert(mLockCount > 0);
