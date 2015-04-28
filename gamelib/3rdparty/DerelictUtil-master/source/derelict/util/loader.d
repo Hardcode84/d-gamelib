@@ -126,13 +126,13 @@ class SharedLibLoader {
          Unloads the shared library from memory, invalidating all function pointers
          which were assigned a symbol by one of the load methods.
         +/
-        void unload() {
+        void unload() @nogc nothrow {
             _lib.unload();
         }
 
         @property {
             /// Returns: true if the shared library is loaded, false otherwise.
-            bool isLoaded() {
+            bool isLoaded() @nogc nothrow {
                 return _lib.isLoaded;
             }
 

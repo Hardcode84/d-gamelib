@@ -34,12 +34,11 @@ private {
     import derelict.util.exception;
     import derelict.util.system;
 }
-
 static if( Derelict_OS_Posix ) {
     static if( Derelict_OS_Linux ) {
         private import std.c.linux.linux;
     } else {
-        extern( C ) nothrow {
+        extern( C ) nothrow @nogc {
             /* From <dlfcn.h>
             *  See http://www.opengroup.org/onlinepubs/007908799/xsh/dlsym.html
             */
@@ -60,7 +59,7 @@ static if( Derelict_OS_Posix ) {
             return dlopen( libName.toStringz(), RTLD_NOW );
         }
 
-        void UnloadSharedLib( SharedLibHandle hlib ) {
+        void UnloadSharedLib( SharedLibHandle hlib ) @nogc nothrow {
             dlclose( hlib );
         }
 
@@ -68,7 +67,7 @@ static if( Derelict_OS_Posix ) {
             return dlsym( hlib, symbolName.toStringz() );
         }
 
-        string GetErrorStr() {
+        string GetErrorStr() @nogc {
             auto err = dlerror();
             if( err is null )
                 return "Uknown Error";
@@ -85,7 +84,7 @@ static if( Derelict_OS_Posix ) {
             return LoadLibraryA( libName.toStringz() );
         }
 
-        void UnloadSharedLib( SharedLibHandle hlib ) {
+        void UnloadSharedLib( SharedLibHandle hlib ) @nogc nothrow {
             FreeLibrary( hlib );
         }
 
@@ -189,7 +188,7 @@ struct SharedLib {
          Unloads the shared library from memory, invalidating all function pointers
          which were assigned a symbol by one of the load methods.
         +/
-        void unload() {
+        void unload() @nogc nothrow {
             if( isLoaded ) {
                 UnloadSharedLib( _hlib );
                 _hlib = null;
@@ -198,12 +197,12 @@ struct SharedLib {
 
         @property {
             /// Returns the name of the shared library.
-            string name() {
+            string name() @nogc nothrow {
                 return _name;
             }
 
             /// Returns true if the shared library is currently loaded, false otherwise.
-            bool isLoaded() {
+            bool isLoaded() @nogc nothrow {
                 return ( _hlib !is null );
             }
 
@@ -216,7 +215,7 @@ struct SharedLib {
                                 derelict.util.exception.ShouldThrow and accepts
                                 a string as the sole parameter.
             +/
-            void missingSymbolCallback( MissingSymbolCallbackDg callback ) {
+            void missingSymbolCallback( MissingSymbolCallbackDg callback ) @nogc {
                 _onMissingSym = callback;
             }
 

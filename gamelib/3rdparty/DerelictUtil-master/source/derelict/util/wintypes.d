@@ -205,7 +205,7 @@ version( Windows ) {
         LONG    bottom;
     }
 
-    extern( Windows ) nothrow {
+    extern( Windows ) nothrow @nogc {
         HDC GetDC( HWND );
         int ChoosePixelFormat( HDC,PIXELFORMATDESCRIPTOR* );
         void SetPixelFormat( HDC,int,PIXELFORMATDESCRIPTOR* );

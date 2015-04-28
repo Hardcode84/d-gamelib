@@ -94,7 +94,11 @@ public:
             {
                 if(mHDC)
                 {
-                    ReleaseDC(mWindow,mHDC);
+                    SDL_SysWMinfo info;
+                    if(SDL_TRUE ==  SDL_GetWindowWMInfo(mWindow,&info))
+                    {
+                        ReleaseDC(info.info.win.window,mHDC);
+                    }
                 }
             }
             invalidateSurface();
