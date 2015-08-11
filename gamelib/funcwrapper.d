@@ -50,6 +50,6 @@ private:
 
 unittest
 {
-    checkedCall!(foo,checker!foo)();
-    checkedCall!(bar,checker!bar)(1,2.0f,"3");
+    cast(void)checkedCall!(foo,checker!foo)();
+    cast(void)checkedCall!(bar,checker!bar)(1,2.0f,"3");
 }

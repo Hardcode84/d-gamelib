@@ -26,7 +26,7 @@ public {
                       sinh, cosh, tanh, asinh, acosh, atanh,
                       pow, exp, log, exp2,
                       floor, trunc, round, ceil, modf,
-                      hypot, isNaN, isInfinity;
+                      isNaN, isInfinity;
     alias round roundEven;
     alias floor fract;
     //import core.stdc.math : fmodf;
@@ -192,16 +192,49 @@ unittest {
     assert(inversesqrt(1.0f) == 1.0f);
     assert(almost_equal(inversesqrt(10.0f), (1/sqrt(10.0f))));
     assert(almost_equal(inversesqrt(2342342.0f), (1/sqrt(2342342.0f))));
-    
+
     assert(sign(-1) == -1.0f);
     assert(sign(0) == 0.0f);
     assert(sign(1) == 1.0f);
     assert(sign(0.5) == 1.0f);
     assert(sign(-0.5) == -1.0f);
-    
+
     assert(mod(12.0, 27.5) == 12.0);
     assert(mod(-12.0, 27.5) == 15.5);
     assert(mod(12.0, -27.5) == -15.5);
+}
+
+auto hypot(T)(in T x, in T y) if(isIntegral!T && (T.sizeof < 8))
+{
+    return cast(T)(sqrt(cast(long)x*cast(long)x + cast(long)y*cast(long)y));
+}
+
+auto hypot(T)(in T x, in T y) if(isFloatingPoint!T)
+{
+    return cast(T)smath.hypot(x,y);
+}
+
+unittest
+{
+    import std.typetuple;
+    foreach(T; TypeTuple!(byte,short,int))
+    {
+        T[3][] vals =     // x,y,hypot
+        [
+            [    0,      0,     0],
+            [    3,      4,     5],
+            [  -30,    -40,    50],
+            [    0,      7,     7]
+        ];
+        foreach(v;vals)
+        {
+            auto x = v[0];
+            auto y = v[1];
+            auto z = v[2];
+            auto h = hypot(x, y);
+            assert(z == h);
+        }
+    }
 }
 
 /// Compares to values and returns true if the difference is epsilon or smaller.
