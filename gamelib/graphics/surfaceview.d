@@ -112,7 +112,7 @@ public:
                 return data[x1..x2];
             }
 
-            auto opSliceAssign(T)(in T val, int x1, int x2) pure nothrow if(M && isAssignable!(ElemT,T))
+            auto opSliceAssign(T)(in T val, int x1, int x2) pure nothrow if(M && isAssignable!(typeof(data[x1..x2]),T))
             {
                 assert(x2 >= x1);
                 correctX(x1);
