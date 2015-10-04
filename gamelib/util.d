@@ -120,7 +120,7 @@ template Widen(T)
     }
     else static if(isFloatingPoint!T)
     {
-        static assert(real.sizeof > double.sizeof);;
+        //static assert(real.sizeof > double.sizeof);;
         alias Widen = NextType!(T, TypeTuple!(float,double,real));
     }
     else static if(isSigned!T)
