@@ -10,9 +10,12 @@ import gamelib.types;
 import gamelib.graphics.color;
 import gamelib.graphics.surface;
 
-version(Windows)
+version(NativeBlit)
 {
-    pragma(lib, "Gdi32");
+    version(Windows)
+    {
+        pragma(lib, "Gdi32");
+    }
 }
 
 class ColorFormatException : Exception
@@ -29,10 +32,13 @@ package:
     SDL_Window* mWindow = null;
     Uint32      mWinId = 0;
     Surface mCachedSurf = null;
-    version(Windows)
+    version(NativeBlit)
     {
-        import core.sys.windows.windows;
-        HDC mHDC = null;
+        version(Windows)
+        {
+            import core.sys.windows.windows;
+            HDC mHDC = null;
+        }
     }
 public:
     this(in string title, in int width, in int height, Uint32 flags = 0)
@@ -46,9 +52,12 @@ public:
             flags);
         SDL_SysWMinfo info;
         sdlCheckBool!SDL_GetWindowWMInfo(mWindow,&info);
-        version(Windows)
+        version(NativeBlit)
         {
-            mHDC = enforce(GetDC(info.info.win.window), "Unable to get HDC");
+            version(Windows)
+            {
+                mHDC = enforce(GetDC(info.info.win.window), "Unable to get HDC");
+            }
         }
         mWinId = SDL_GetWindowID(mWindow);
     }
@@ -90,14 +99,17 @@ public:
     {
         if(mWindow)
         {
-            version(Windows)
+            version(NativeBlit)
             {
-                if(mHDC)
+                version(Windows)
                 {
-                    SDL_SysWMinfo info;
-                    if(SDL_TRUE ==  SDL_GetWindowWMInfo(mWindow,&info))
+                    if(mHDC)
                     {
-                        ReleaseDC(info.info.win.window,mHDC);
+                        SDL_SysWMinfo info;
+                        if(SDL_TRUE ==  SDL_GetWindowWMInfo(mWindow,&info))
+                        {
+                            ReleaseDC(info.info.win.window,mHDC);
+                        }
                     }
                 }
             }
@@ -162,56 +174,59 @@ public:
 
     void blit(Surface surf)
     {
-        version(Windows)
+        version(NativeBlit)
         {
-            assert(mHDC);
-            const sz = size;
-            const fmt = surf.format;
-            struct tempstruct_t
+            version(Windows)
             {
-                BITMAPINFO bmi;
-                byte[RGBQUAD.sizeof * 255] data;
-            }
-            tempstruct_t s;
-            s.bmi.bmiHeader.biSize = s.bmi.bmiHeader.sizeof;
-            s.bmi.bmiHeader.biWidth = sz.x;
-            s.bmi.bmiHeader.biHeight = -sz.y;
-            s.bmi.bmiHeader.biPlanes = 1;
-            s.bmi.bmiHeader.biBitCount = fmt.BitsPerPixel;
-            s.bmi.bmiHeader.biCompression = 0;//BI_RGB;
-            s.bmi.bmiHeader.biSizeImage = 0;
-            s.bmi.bmiHeader.biXPelsPerMeter = 0;
-            s.bmi.bmiHeader.biYPelsPerMeter = 0;
-            s.bmi.bmiHeader.biClrUsed = 0;
-            s.bmi.bmiHeader.biClrImportant = 0;
+                assert(mHDC);
+                const sz = size;
+                const fmt = surf.format;
+                struct tempstruct_t
+                {
+                    BITMAPINFO bmi;
+                    byte[RGBQUAD.sizeof * 255] data;
+                }
+                tempstruct_t s;
+                s.bmi.bmiHeader.biSize = s.bmi.bmiHeader.sizeof;
+                s.bmi.bmiHeader.biWidth = sz.x;
+                s.bmi.bmiHeader.biHeight = -sz.y;
+                s.bmi.bmiHeader.biPlanes = 1;
+                s.bmi.bmiHeader.biBitCount = fmt.BitsPerPixel;
+                s.bmi.bmiHeader.biCompression = 0;//BI_RGB;
+                s.bmi.bmiHeader.biSizeImage = 0;
+                s.bmi.bmiHeader.biXPelsPerMeter = 0;
+                s.bmi.bmiHeader.biYPelsPerMeter = 0;
+                s.bmi.bmiHeader.biClrUsed = 0;
+                s.bmi.bmiHeader.biClrImportant = 0;
 
-            if(fmt.BytesPerPixel > 1)
-            {
-                s.bmi.bmiHeader.biCompression = 3;//BI_BITFIELDS;
-                auto masks = cast(uint*)(s.bmi.bmiColors.ptr);
-                masks[0] = fmt.Rmask;
-                masks[1] = fmt.Gmask;
-                masks[2] = fmt.Bmask;
-            }
-            else
-            {
-                assert(false);//TODO: paletted formats
-            }
-            surf.lock;
-            scope(exit) surf.unlock;
+                if(fmt.BytesPerPixel > 1)
+                {
+                    s.bmi.bmiHeader.biCompression = 3;//BI_BITFIELDS;
+                    auto masks = cast(uint*)(s.bmi.bmiColors.ptr);
+                    masks[0] = fmt.Rmask;
+                    masks[1] = fmt.Gmask;
+                    masks[2] = fmt.Bmask;
+                }
+                else
+                {
+                    assert(false);//TODO: paletted formats
+                }
+                surf.lock;
+                scope(exit) surf.unlock;
 
-            enforce(0 != SetDIBitsToDevice(mHDC,
-                                           0,//xdest,
-                                           0,//ydest,
-                                           sz.x,//width,
-                                           sz.y,//height,
-                                           0,//xsrc,
-                                           0,//ysrc,
-                                           0,
-                                           sz.y,//height,
-                                           surf.data,
-                                           &s.bmi,
-                                           0/*DIB_RGB_COLORS*/));
+                enforce(0 != SetDIBitsToDevice(mHDC,
+                                               0,//xdest,
+                                               0,//ydest,
+                                               sz.x,//width,
+                                               sz.y,//height,
+                                               0,//xsrc,
+                                               0,//ysrc,
+                                               0,
+                                               sz.y,//height,
+                                               surf.data,
+                                               &s.bmi,
+                                               0/*DIB_RGB_COLORS*/));
+            }
         }
         else
         {
