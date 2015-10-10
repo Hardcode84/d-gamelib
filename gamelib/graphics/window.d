@@ -41,14 +41,14 @@ package:
         }
     }
 public:
-    this(in string title, in int width, in int height, Uint32 flags = 0)
+    this(in string title, in Size size, Uint32 flags = 0)
     {
         mWindow = sdlCheckNull!SDL_CreateWindow(
             toStringz(title),
             SDL_WINDOWPOS_UNDEFINED,
             SDL_WINDOWPOS_UNDEFINED,
-            width,
-            height,
+            size.w,
+            size.h,
             flags);
         SDL_SysWMinfo info;
         sdlCheckBool!SDL_GetWindowWMInfo(mWindow,&info);
@@ -79,52 +79,10 @@ public:
         SDL_SetWindowTitle(mWindow, toStringz(t));
     }
 
-    void setSize(int x, int y) nothrow
+    @property auto formatString()
     {
         assert(mWindow);
-        invalidateSurface();
-        SDL_SetWindowSize(mWindow, x, y);
-    }
-
-    void invalidateSurface() nothrow
-    {
-        if(mCachedSurf)
-        {
-            mCachedSurf.dispose();
-            mCachedSurf = null;
-        }
-    }
-
-    void dispose() nothrow
-    {
-        if(mWindow)
-        {
-            version(NativeBlit)
-            {
-                version(Windows)
-                {
-                    if(mHDC)
-                    {
-                        SDL_SysWMinfo info;
-                        if(SDL_TRUE ==  SDL_GetWindowWMInfo(mWindow,&info))
-                        {
-                            ReleaseDC(info.info.win.window,mHDC);
-                        }
-                    }
-                }
-            }
-            invalidateSurface();
-            SDL_DestroyWindow(mWindow);
-            mWindow = null;
-        }
-    }
-
-    @property auto size() nothrow
-    {
-        assert(mWindow);
-        Point ret;
-        SDL_GetWindowSize(mWindow, &ret.x, &ret.y);
-        return ret;
+        return text(SDL_GetPixelFormatName(SDL_GetWindowPixelFormat(mWindow))).idup;
     }
 
     //do not dispose returned surface
@@ -248,10 +206,53 @@ public:
         }
     }
 
-    @property auto formatString()
+@nogc:
+    void invalidateSurface() nothrow
+    {
+        if(mCachedSurf)
+        {
+            mCachedSurf.dispose();
+            mCachedSurf = null;
+        }
+    }
+    
+    void dispose() nothrow
+    {
+        if(mWindow)
+        {
+            version(NativeBlit)
+            {
+                version(Windows)
+                {
+                    if(mHDC)
+                    {
+                        SDL_SysWMinfo info;
+                        if(SDL_TRUE ==  SDL_GetWindowWMInfo(mWindow,&info))
+                        {
+                            ReleaseDC(info.info.win.window,mHDC);
+                        }
+                    }
+                }
+            }
+            invalidateSurface();
+            SDL_DestroyWindow(mWindow);
+            mWindow = null;
+        }
+    }
+    
+    @property Size size() nothrow
     {
         assert(mWindow);
-        return text(SDL_GetPixelFormatName(SDL_GetWindowPixelFormat(mWindow))).idup;
+        Size ret;
+        SDL_GetWindowSize(mWindow, &ret.w, &ret.h);
+        return ret;
+    }
+    
+    @property void size(in Size sz) nothrow
+    {
+        assert(mWindow);
+        invalidateSurface();
+        SDL_SetWindowSize(mWindow, sz.w, sz.h);
     }
 
     @property bool hidden() nothrow
