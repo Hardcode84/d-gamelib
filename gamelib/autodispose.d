@@ -1,12 +1,12 @@
 module gamelib.autodispose;
 
-import std.typetuple:staticIndexOf;
-import std.traits:isArray,isAssociativeArray;
 enum auto_dispose;
 mixin template GenerateAutoDispose()
 {
     void dispose()
     {
+        import std.typetuple:staticIndexOf;
+        import std.traits:isArray,isAssociativeArray;
         foreach_reverse(i,t;this.tupleof)
         {
             static if(staticIndexOf!(auto_dispose,__traits(getAttributes, this.tupleof[i])) != -1)

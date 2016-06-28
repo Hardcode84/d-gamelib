@@ -39,7 +39,7 @@ public:
         mPtr = s;
     }
 
-    auto alloc(T)(int count)
+    auto alloc(T)(size_t count)
     in
     {
         assert(count >= 0);
