@@ -146,8 +146,8 @@ public:
                 }
                 tempstruct_t s;
                 s.bmi.bmiHeader.biSize = s.bmi.bmiHeader.sizeof;
-                s.bmi.bmiHeader.biWidth = sz.x;
-                s.bmi.bmiHeader.biHeight = -sz.y;
+                s.bmi.bmiHeader.biWidth = sz.w;
+                s.bmi.bmiHeader.biHeight = -sz.h;
                 s.bmi.bmiHeader.biPlanes = 1;
                 s.bmi.bmiHeader.biBitCount = fmt.BitsPerPixel;
                 s.bmi.bmiHeader.biCompression = 0;//BI_RGB;
@@ -175,12 +175,12 @@ public:
                 enforce(0 != SetDIBitsToDevice(mHDC,
                                                0,//xdest,
                                                0,//ydest,
-                                               sz.x,//width,
-                                               sz.y,//height,
+                                               sz.w,//width,
+                                               sz.h,//height,
                                                0,//xsrc,
                                                0,//ysrc,
                                                0,
-                                               sz.y,//height,
+                                               sz.h,//height,
                                                surf.data,
                                                &s.bmi,
                                                0/*DIB_RGB_COLORS*/));
