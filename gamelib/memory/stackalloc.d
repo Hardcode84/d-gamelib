@@ -58,6 +58,13 @@ public:
         return (cast(T*)ptr)[0..count];
     }
 
+    auto alloc(T)(size_t count, T val)
+    {
+        auto res = alloc!T(count);
+        res[] = val;
+        return res;
+    }
+
     auto alloc(T)()
     {
         return alloc!T(1).ptr;
