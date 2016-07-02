@@ -69,6 +69,16 @@ public:
     {
         return alloc!T(1).ptr;
     }
+
+    auto size() const
+    {
+        return mMemory.length;
+    }
+
+    auto allocated() const
+    {
+        return mPtr - mMemory.ptr;
+    }
 }
 //TODO: tests
 
