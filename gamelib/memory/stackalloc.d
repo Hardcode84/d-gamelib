@@ -10,7 +10,7 @@ final class StackAlloc
 pure nothrow:
 private:
     void[] mMemory;
-    void*  mPtr;
+    void*  mPtr = null;
 public:
     this(size_t bytes)
     {
@@ -70,12 +70,12 @@ public:
         return alloc!T(1).ptr;
     }
 
-    auto size() const
+    auto capacity() const
     {
         return mMemory.length;
     }
 
-    auto allocated() const
+    auto size() const
     {
         return mPtr - mMemory.ptr;
     }
