@@ -1,9 +1,21 @@
 ﻿module gamelib.graphics.surface;
 
 import std.traits;
+import std.format;
 import gamelib.types;
 
 import derelict.sdl2.sdl;
+
+struct SurfaceParams
+{
+    int width;
+    int height;
+    int depth;
+    Uint32 Rmask = 0x000000ff;
+    Uint32 Gmask = 0x0000ff00;
+    Uint32 Bmask = 0x00ff0000;
+    Uint32 Amask = 0xff000000;
+}
 
 class Surface
 {
@@ -13,6 +25,7 @@ package:
     int mLockCount = 0;
     immutable int mWidth;
     immutable int mHeight;
+    void* mData = null;
     this(SDL_Surface* surf)
     {
         assert(surf);
@@ -23,26 +36,32 @@ package:
     }
 public:
 final:
-    this(int width,
-         int height,
-         int depth,
-         Uint32 Rmask = 0x000000ff,
-         Uint32 Gmask = 0x0000ff00,
-         Uint32 Bmask = 0x00ff0000,
-         Uint32 Amask = 0xff000000,
-         void* pixels = null,
-         int pitch = 0)
+    this(in SurfaceParams params,
+         int pitch = 0,
+         void* pixels = null)
     {
-        if(pixels is null)
+        if(0 == pitch)
         {
-            mSurface = sdlCheckNull!SDL_CreateRGBSurface(0,width,height,depth,Rmask,Gmask,Bmask,Amask);
+            mSurface = sdlCheckNull!SDL_CreateRGBSurface(0,params.width,params.height,params.depth,params.Rmask,params.Gmask,params.Bmask,params.Amask);
         }
         else
         {
-            mSurface = sdlCheckNull!SDL_CreateRGBSurfaceFrom(pixels,width,height,depth,pitch,Rmask,Gmask,Bmask,Amask);
+            enforce(params.width > 0 && params.height > 0, std.format.format("Invalid image size: %sx%s",params.width, params.height));
+            enforce(0 == params.depth % 8, std.format.format("Invalid depth: %s", params.depth));
+            enforce(pitch >= (params.width * (params.depth / 8)), std.format.format("Invalid pitch: %s", pitch));
+            if(pixels is null)
+            {
+                import core.memory;
+                enum AlignSize = 64;
+                const size = pitch * params.height + AlignSize;
+                mData = GC.qalloc(size, GC.BlkAttr.NO_SCAN | GC.BlkAttr.NO_INTERIOR).base;
+                import gamelib.memory.utils;
+                pixels = alignPointer(mData, AlignSize);
+            }
+            mSurface = sdlCheckNull!SDL_CreateRGBSurfaceFrom(pixels,params.width,params.height,params.depth,pitch,params.Rmask,params.Gmask,params.Bmask,params.Amask);
         }
-        mWidth = width;
-        mHeight = height;
+        mWidth  = params.width;
+        mHeight = params.height;
     }
     ~this() const pure nothrow
     {
@@ -59,6 +78,12 @@ final:
                 SDL_FreeSurface(mSurface);
             }
             mSurface = null;
+        }
+        if(mData !is null)
+        {
+            //import core.memory;
+            //GC.free(mData);
+            mData = null;
         }
     }
 
@@ -130,8 +155,8 @@ public:
     alias ColorType = ColorT;
     this(int width,
          int height,
-         void* pixels = null,
-         int pitch = 0)
+         int pitch = 0,
+         void* pixels = null)
     {
         enum depth = ColorT.sizeof * 8;
         static if(depth > 8)
@@ -140,11 +165,11 @@ public:
             Uint32 Gmask = ColorT.gmask;
             Uint32 Bmask = ColorT.bmask;
             Uint32 Amask = ColorT.amask;
-            super(width, height, depth, Rmask, Gmask, Bmask, Amask, pixels, pitch);
+            super(SurfaceParams(width, height, depth, Rmask, Gmask, Bmask, Amask), pitch, pixels);
         }
         else
         {
-            super(width, height, depth, 0, 0, 0, 0, pixels, pitch);
+            super(SurfaceParams(width, height, depth, 0, 0, 0, 0), pitch, pixels);
         }
     }
 

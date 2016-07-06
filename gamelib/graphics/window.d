@@ -139,6 +139,8 @@ public:
                 assert(mHDC);
                 const sz = size;
                 const fmt = surf.format;
+                assert(0 == fmt.BitsPerPixel % 8);
+                assert(0 == surf.pitch % fmt.BytesPerPixel);
                 struct tempstruct_t
                 {
                     BITMAPINFO bmi;
@@ -146,7 +148,7 @@ public:
                 }
                 tempstruct_t s;
                 s.bmi.bmiHeader.biSize = s.bmi.bmiHeader.sizeof;
-                s.bmi.bmiHeader.biWidth = sz.w;
+                s.bmi.bmiHeader.biWidth = surf.pitch / fmt.BytesPerPixel;
                 s.bmi.bmiHeader.biHeight = -sz.h;
                 s.bmi.bmiHeader.biPlanes = 1;
                 s.bmi.bmiHeader.biBitCount = fmt.BitsPerPixel;
@@ -185,6 +187,10 @@ public:
                                                &s.bmi,
                                                0/*DIB_RGB_COLORS*/));
             }
+            else
+            {
+                static assert(false, "Not implemented");
+            }
         }
         else
         {
@@ -215,7 +221,7 @@ public:
             mCachedSurf = null;
         }
     }
-    
+
     void dispose() nothrow
     {
         if(mWindow)

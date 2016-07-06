@@ -51,7 +51,7 @@ public:
             }
             size_t pitch;
             ElemT* data;
-            
+
             void checkCoord(int x) const pure nothrow
             {
                 assert(x >= 0, debugConv(x));
@@ -139,6 +139,11 @@ public:
                     data = cast(ElemT*)(cast(byte*)data + pitch * dy);
                 }
                 return this;
+            }
+
+            @property auto ptr() pure nothrow
+            {
+                return data;
             }
         }
         static if(Wrap)

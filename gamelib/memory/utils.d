@@ -2,9 +2,23 @@
 
 import gamelib.types;
 
-@nogc T* alignPointer(T)(void* ptr) pure nothrow
+@nogc auto alignPointer(inout(void)* ptr, size_t size) pure nothrow
 {
-    return cast(T*)((cast(size_t)ptr + (T.alignof - 1)) & ~(T.alignof - 1));
+    import gamelib.math;
+    assert(size > 0);
+    assert(ispow2(size));
+    return cast(void*)((cast(size_t)ptr + (size - 1)) & ~(size - 1));
+}
+
+@nogc auto alignPointer(T)(inout(void)* ptr) pure nothrow
+{
+    return cast(inout(T)*)alignPointer(ptr, T.alignof);
+}
+
+@nogc auto alignSize(T)(in T val, size_t size) pure nothrow
+{
+    assert(size > 0);
+    return cast(T)(((val + size - 1) / size) * size);
 }
 
 void destruct(T)(ref T obj) if(is(T == struct))
@@ -46,6 +60,20 @@ unittest
     }
     auto ptr = alignPointer!Foo(cast(void*)0x1);
     assert(cast(void*)0x4 == ptr,debugConv(ptr));
+}
+
+unittest
+{
+    assert(1 == alignSize(1, 1));
+    assert(5 == alignSize(1, 5));
+    assert(0xff == alignSize(1, 0xff));
+
+    assert(4 == alignSize(1, 4));
+    assert(4 == alignSize(4, 4));
+    assert(8 == alignSize(5, 4));
+    assert(8 == alignSize(8, 4));
+    assert(12 == alignSize(9, 4));
+    assert(15 == alignSize(13, 5));
 }
 
 unittest
