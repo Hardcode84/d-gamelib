@@ -146,7 +146,7 @@ public:
                     BITMAPINFO bmi;
                     byte[RGBQUAD.sizeof * 255] data;
                 }
-                tempstruct_t s;
+                tempstruct_t s = void;
                 s.bmi.bmiHeader.biSize = s.bmi.bmiHeader.sizeof;
                 s.bmi.bmiHeader.biWidth = surf.pitch / fmt.BytesPerPixel;
                 s.bmi.bmiHeader.biHeight = -sz.h;
