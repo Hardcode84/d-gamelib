@@ -63,7 +63,7 @@ public:
         {
             assert(mMemory[i].ptr !is null);
             (cast(free_t)&free)(mMemory[i].ptr);
-            mMemory[i] = [];
+            mMemory[i] = MemRange.init;
         }
     }
 
