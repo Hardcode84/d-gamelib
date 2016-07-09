@@ -85,7 +85,7 @@ public:
                 return data[x];
             }
 
-            auto opIndexAssign(T)(in T value, int x) pure nothrow if(M && isAssignable!(ElemT,T))
+            auto opIndexAssign(T)(in T value, int x) pure nothrow if(M)
             {
                 correctX(x);
                 checkCoord(x);
@@ -97,8 +97,11 @@ public:
                 assert(x2 >= x1);
                 correctX(x1);
                 correctX(x2);
-                checkCoord(x1);
-                debug assert(x2 <= width);
+                debug if(x2 > x1)
+                {
+                    checkCoord(x1);
+                    assert(x2 <= width);
+                }
                 return data[x1..x2];
             }
 
@@ -112,13 +115,16 @@ public:
                 return data[x1..x2];
             }
 
-            auto opSliceAssign(T)(in T val, int x1, int x2) pure nothrow if(M && isAssignable!(typeof(data[x1..x2]),T))
+            auto opSliceAssign(T)(in T val, int x1, int x2) pure nothrow if(M)
             {
                 assert(x2 >= x1);
                 correctX(x1);
                 correctX(x2);
-                checkCoord(x1);
-                debug assert(x2 <= width, debugConv(x2));
+                debug if(x2 > x1)
+                {
+                    checkCoord(x1);
+                    assert(x2 <= width, debugConv(x2));
+                }
                 return data[x1..x2] = val;
             }
 
