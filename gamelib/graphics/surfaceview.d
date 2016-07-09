@@ -130,7 +130,7 @@ public:
 
             ref auto opUnary(string op)() pure nothrow if(op == "++" || op == "--")
             {
-                mixin("data = cast(ElemT*)(cast(byte*)data"~op[0]~" pitch);");
+                mixin("data = cast(ElemT*)(cast(byte*)data "~op[0]~" pitch);");
                 debug
                 {
                     mixin("y"~op~";");

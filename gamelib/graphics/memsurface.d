@@ -34,7 +34,7 @@ public:
         SurfaceView!(ElemT) view = this;
         return view[y];
     }
-    
+
     void fill(T)(in T val) pure nothrow if(isAssignable!(ElemT, T))
     {
         ElemT* d = data;
