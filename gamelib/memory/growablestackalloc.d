@@ -19,11 +19,16 @@ private:
     size_t mCapacity = 0;
     int mCurrentBlock = 0;
     int mTotalBlocks = 0;
+    debug
+    {
+        int mLastAllocIndex = 0;
+    }
 
     @property auto currentMemBlock() inout
     {
         assert(mCurrentBlock >= 0);
         assert(mCurrentBlock < mMemory.length);
+        assert(mCurrentBlock < mTotalBlocks);
         assert(mMemory[mCurrentBlock].length > 0);
         return mMemory[mCurrentBlock][];
     }
@@ -74,19 +79,22 @@ public:
         {
             void* ptr;
             int block;
+            int index;
         }
     }
 
     @property State state()
     {
-        import core.bitop;
         assert(ispow2(mMemory[0].length));
-        const dptr = (mPtr - currentMemBlock.ptr);
-        assert(dptr < (mMemory[0].length << mCurrentBlock));
+        assert(mPtr >= currentMemBlock.ptr);
+        const ptrdiff_t dptr = (mPtr - currentMemBlock.ptr);
+        assert(dptr >= 0);
+        assert(cast(size_t)dptr < cast(size_t)(mMemory[0].length << mCurrentBlock));
         const val = (mMemory[0].length << mCurrentBlock) + dptr;
+        assert(0 != val);
         debug
         {
-            return State(val, mPtr, mCurrentBlock);
+            return State(val, mPtr, mCurrentBlock,mLastAllocIndex++);
         }
         else
         {
@@ -96,6 +104,11 @@ public:
 
     void restoreState(State s)
     {
+        debug
+        {
+            assert(s.index == (mLastAllocIndex - 1));
+            --mLastAllocIndex;
+        }
         import core.bitop;
         assert(0 != s.val);
         assert(ispow2(mMemory[0].length));
@@ -107,7 +120,7 @@ public:
         mPtr = currentMemBlock.ptr + (s.val - (mMemory[0].length << mCurrentBlock));
         debug assert(mPtr == s.ptr);
         assert(mPtr >= mMemory[mCurrentBlock].ptr);
-        assert(mPtr < (mMemory[mCurrentBlock].ptr + mMemory[mCurrentBlock].length));
+        assert(mPtr <= (mMemory[mCurrentBlock].ptr + mMemory[mCurrentBlock].length));
     }
 
     auto alloc(T)(size_t count)
@@ -124,10 +137,10 @@ public:
             auto mem = currentMemBlock;
             assert(mPtr >= mem.ptr);
             auto ptr = alignPointer!T(mPtr);
-            auto ptrEnd = ptr + size * count;
-            const memEnd = mem.ptr + mem.length;
             assert(ptr >= mem.ptr);
-            if(ptrEnd > memEnd)
+            const ptrdiff_t totalSize = size * count;
+            const ptrdiff_t sizeAvail = mem.length - (ptr - mem.ptr);
+            if(totalSize > sizeAvail)
             {
                 if(mMemory[mCurrentBlock + 1].length == 0)
                 {
@@ -137,9 +150,10 @@ public:
                 mPtr = currentMemBlock.ptr;
                 continue;
             }
-            assert(ptr >= currentMemBlock.ptr);
-            assert(ptrEnd <= (currentMemBlock.ptr + currentMemBlock.length));
-            mPtr = ptrEnd;
+            assert(cast(void*)ptr >= currentMemBlock.ptr);
+            assert(cast(void*)ptr < (currentMemBlock.ptr + currentMemBlock.length));
+            mPtr = cast(void*)ptr + totalSize;
+            assert(mPtr >= cast(void*)ptr);
             return (cast(T*)ptr)[0..count];
         }
         assert(false);
